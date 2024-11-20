@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "generate:entities": "typeorm-model-generator -h 103.149.177.57 -d db_bjs -u root -x bisaja2129 -e mysql -o ./src/shared --fileNamingStrategy=./src/scripts/typeorm-naming-strategy"
+    "generate:entities": "ts-node ./src/scripts/generate-entities.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.8",
