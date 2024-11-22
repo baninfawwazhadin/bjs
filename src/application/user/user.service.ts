@@ -1,12 +1,256 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { UserDummy } from '~/shared/entities/user_dummy.entity';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
+import { DataSource, Repository } from 'typeorm';
+import { CreateUserDto } from './dto/post-user.dto';
+import { User } from '~/shared/entities/user.entity';
+import { Role } from '~/shared/entities/role.entity';
+import { UserOtp } from '~/shared/entities/user_otp.entity';
+import { EmailService } from '../email/email.service';
+import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject('DATA_SOURCE') private readonly dataSource: DataSource) {}
-  async findAll() {
-    const result = await this.dataSource.getRepository(UserDummy).find();
+  private readonly userRepository: Repository<User>;
+
+  constructor(
+    @Inject('DATA_SOURCE') private readonly dataSource: DataSource,
+    private readonly emailService: EmailService,
+  ) {
+    this.userRepository = this.dataSource.getRepository(User);
+  }
+
+  async create(payload: CreateUserDto) {
+    try {
+      const newUserId = await this.dataSource.transaction(async (manager) => {
+        const roleRepository = manager.getRepository(Role);
+
+        const foundRole = await roleRepository.findOne({
+          where: {
+            id: payload.role_pkid,
+          },
+        });
+        if (!foundRole) {
+          throw new BadRequestException('Role not found');
+        }
+
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(payload.password, salt);
+
+        const userRepository = manager.getRepository(User);
+        const newUser = userRepository.create({
+          ...payload,
+          pkid: 1,
+          password: hashedPassword,
+        });
+        const insertUserResult = await userRepository.insert(newUser);
+
+        const newUserId = insertUserResult.identifiers[0]?.pkid;
+        if (!newUserId) {
+          throw new InternalServerErrorException('Failed to create user.');
+        }
+
+        const userOtpRepository = manager.getRepository(UserOtp);
+        const newUserOtp = userOtpRepository.create({
+          user_pkid: newUserId,
+          pkid: 1,
+        });
+        await userOtpRepository.insert(newUserOtp);
+
+        return newUserId;
+      });
+
+      const result = this.findOneProfile(newUserId);
+
+      return result;
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'An unexpected error occurred during user creation.\n' + error.message,
+      );
+    }
+  }
+
+  async verifyOtp(pkid: number, otp_code: string) {
+    const userOtpRepository = this.dataSource.getRepository(UserOtp);
+    const otpRecord = await userOtpRepository.findOne({
+      where: { user_pkid: pkid, otp_code },
+    });
+
+    if (!otpRecord || otpRecord.is_used) {
+      throw new ForbiddenException('Invalid or already used OTP.');
+    }
+
+    await userOtpRepository.update(otpRecord.pkid, { is_used: true });
+
+    return { message: 'OTP verified successfully.' };
+  }
+
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { username, is_user_active: true },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    const isMatch = bcrypt.compareSync(password, user.password);
+
+    return isMatch ? user : null;
+  }
+
+  async findOneProfile(pkid: number) {
+    const result = await this.userRepository.findOne({
+      select: [
+        'pkid',
+        'username',
+        'first_name',
+        'last_name',
+        'role_pkid',
+        'phone_number',
+        'email',
+        'role',
+        'userOtp',
+      ],
+      where: {
+        pkid: pkid,
+      },
+      relations: ['role', 'userOtp'],
+    });
+
+    if (!result) {
+      throw new NotFoundException('User not found.');
+    }
     return result;
+  }
+
+  async changePassword(user_pkid: number, payload: ChangePasswordDto) {
+    const userRepository = this.dataSource.getRepository(User);
+    const userOtpRepository = this.dataSource.getRepository(UserOtp);
+
+    const foundUser = await userRepository.findOne({
+      where: {
+        pkid: user_pkid,
+      },
+    });
+
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const foundOtp = await userOtpRepository.findOne({
+      where: [
+        { user_pkid, is_used: true },
+        { user_pkid, otp_code: '' },
+      ],
+    });
+
+    if (!foundOtp) {
+      throw new NotFoundException('OTP not found.');
+    }
+    const isMatch = bcrypt.compareSync(
+      payload.old_password,
+      foundUser.password,
+    );
+    if (!isMatch) {
+      throw new ForbiddenException('Old password mismatch');
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(payload.new_password, salt);
+
+    await userRepository.update(user_pkid, {
+      password: hashedPassword,
+    });
+
+    return null;
+  }
+
+  async forgetPasswordSubmit(username: string) {
+    await this.dataSource.transaction(async (manager) => {
+      const foundUser = await manager.getRepository(User).findOne({
+        where: {
+          username,
+        },
+      });
+      if (!foundUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      const userOtpRepository = manager.getRepository(UserOtp);
+
+      const foundOtp = await userOtpRepository.findOne({
+        where: { user_pkid: foundUser.pkid },
+      });
+
+      if (!foundOtp) {
+        throw new NotFoundException('OTP not found.');
+      }
+
+      const otp_code = Math.floor(100000 + Math.random() * 900000).toString();
+      await userOtpRepository.update(foundOtp.pkid, {
+        otp_code,
+      });
+
+      await this.emailService.sendEmail(
+        foundUser.email,
+        'Forget Password',
+        `otp: ${otp_code}`,
+      );
+    });
+    return null;
+  }
+
+  async forgetPassword(payload: ForgetPasswordDto) {
+    const userRepository = this.dataSource.getRepository(User);
+    const userOtpRepository = this.dataSource.getRepository(UserOtp);
+
+    const foundUser = await userRepository.findOne({
+      where: {
+        username: payload.username,
+      },
+    });
+
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const foundOtp = await userOtpRepository.findOne({
+      where: { user_pkid: foundUser.pkid, is_used: true },
+    });
+
+    if (!foundOtp) {
+      throw new NotFoundException('OTP not found.');
+    }
+
+    const isMatch = bcrypt.compareSync(payload.password, foundUser.password);
+    if (!isMatch) {
+      throw new ForbiddenException(
+        'New password cannot be same as old password.',
+      );
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = bcrypt.hashSync(payload.password, salt);
+
+    await userRepository.update(foundUser.pkid, {
+      password: hashedPassword,
+    });
+
+    return null;
   }
 }
