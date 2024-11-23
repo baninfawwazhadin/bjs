@@ -1,4 +1,6 @@
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import { Employee } from './employee.entity';
+import { EmployeeDependant } from './employee_dependant.entity';
 import { Service } from './service.entity';
 
 @Index('email_UNIQUE', ['email'], { unique: true })
@@ -57,6 +59,15 @@ export class Company {
 
   @Column('varchar', { name: 'deleted_by', nullable: true, length: 45 })
   deleted_by: string | null;
+
+  @OneToMany(() => Employee, (employee) => employee.company)
+  employee: Employee[];
+
+  @OneToMany(
+    () => EmployeeDependant,
+    (employee_dependant) => employee_dependant.company,
+  )
+  employeeDependant: EmployeeDependant[];
 
   @OneToMany(() => Service, (service) => service.company)
   service: Service[];

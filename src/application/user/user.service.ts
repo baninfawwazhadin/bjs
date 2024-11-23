@@ -33,7 +33,7 @@ export class UserService {
 
         const foundRole = await roleRepository.findOne({
           where: {
-            id: payload.role_pkid,
+            pkid: payload.role_pkid,
           },
         });
         if (!foundRole) {
@@ -43,15 +43,27 @@ export class UserService {
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(payload.password, salt);
 
-        const userRepository = manager.getRepository(User);
-        const newUser = userRepository.create({
-          ...payload,
-          pkid: 1,
-          password: hashedPassword,
-        });
-        const insertUserResult = await userRepository.insert(newUser);
+        const insertUserQuery = `
+          INSERT INTO user 
+          (username, password, first_name, last_name, role_pkid, phone_number, email) 
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const parameters = [
+          payload.username,
+          hashedPassword,
+          payload.first_name,
+          payload.last_name,
+          payload.role_pkid,
+          payload.phone_number,
+          payload.email,
+        ];
 
-        const newUserId = insertUserResult.identifiers[0]?.pkid;
+        await manager.query(insertUserQuery, parameters);
+
+        const pkidQuery = 'SELECT pkid FROM user WHERE username = ?';
+        const pkidResult = await manager.query(pkidQuery, [payload.username]);
+
+        const newUserId = pkidResult[0]?.pkid;
         if (!newUserId) {
           throw new InternalServerErrorException('Failed to create user.');
         }
@@ -79,12 +91,12 @@ export class UserService {
       }
 
       throw new InternalServerErrorException(
-        'An unexpected error occurred during user creation.\n' + error.message,
+        'An unexpected error occurred during user creation: ' + error.message,
       );
     }
   }
 
-  async verifyOtp(pkid: number, otp_code: string) {
+  async verifyOtp(pkid: string, otp_code: string) {
     const userOtpRepository = this.dataSource.getRepository(UserOtp);
     const otpRecord = await userOtpRepository.findOne({
       where: { user_pkid: pkid, otp_code },
@@ -113,7 +125,7 @@ export class UserService {
     return isMatch ? user : null;
   }
 
-  async findOneProfile(pkid: number) {
+  async findOneProfile(pkid: string) {
     const result = await this.userRepository.findOne({
       select: [
         'pkid',
@@ -138,7 +150,7 @@ export class UserService {
     return result;
   }
 
-  async changePassword(user_pkid: number, payload: ChangePasswordDto) {
+  async changePassword(user_pkid: string, payload: ChangePasswordDto) {
     const userRepository = this.dataSource.getRepository(User);
     const userOtpRepository = this.dataSource.getRepository(UserOtp);
 

@@ -9,14 +9,14 @@ import {
 import { User } from './user.entity';
 
 @Index('id_UNIQUE', ['pkid'], { unique: true })
-@Index('user_id_idx', ['user_pkid'], {})
+@Index('user_otp_pkid_idx', ['user_pkid'], {})
 @Entity('user_otp', { schema: 'db_bjs' })
 export class UserOtp {
   @PrimaryColumn({ type: 'int' })
   pkid: number;
 
-  @Column('int', { name: 'user_pkid' })
-  user_pkid: number;
+  @Column('varchar', { name: 'user_pkid', length: 7 })
+  user_pkid: string;
 
   @Column('varchar', { name: 'otp_code', nullable: true, length: 6 })
   otp_code: string | null;

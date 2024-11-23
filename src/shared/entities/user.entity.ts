@@ -20,8 +20,8 @@ export class User {
   @Column('int', { name: 'id', unique: true })
   id: number;
 
-  @PrimaryColumn({ type: 'int' })
-  pkid: number;
+  @PrimaryColumn({ type: 'varchar', insert: false, update: false })
+  pkid: string;
 
   @Column('varchar', { name: 'username', length: 45 })
   username: string;

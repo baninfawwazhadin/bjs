@@ -1,22 +1,12 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryColumn,
-} from 'typeorm';
-import { Company } from './company.entity';
-import { EmployeeDependant } from './employee_dependant.entity';
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import { ClientDependant } from './client_dependant.entity';
 
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
-@Index('phone_numer_UNIQUE', ['phone_number'], { unique: true })
+@Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
 @Index('email_UNIQUE', ['email'], { unique: true })
-@Index('employee_company_pkid_idx', ['company_pkid'], {})
-@Entity('employee', { schema: 'db_bjs' })
-export class Employee {
+@Entity('client', { schema: 'db_bjs' })
+export class Client {
   @Column('int', { name: 'id', unique: true })
   id: number;
 
@@ -41,11 +31,16 @@ export class Employee {
   @Column('varchar', { name: 'email', unique: true, length: 50 })
   email: string;
 
-  @Column('varchar', { name: 'company_pkid', length: 7 })
-  company_pkid: string;
+  @Column('varchar', { name: 'position', length: 45 })
+  position: string;
 
-  @Column('tinyint', { name: 'is_active', width: 1, default: () => "'1'" })
-  is_active: boolean;
+  @Column('tinyint', {
+    name: 'is_active',
+    nullable: true,
+    width: 1,
+    default: () => "'1'",
+  })
+  is_active: boolean | null;
 
   @Column('datetime', {
     name: 'created_at',
@@ -73,16 +68,9 @@ export class Employee {
   @Column('varchar', { name: 'deleted_by', nullable: true, length: 45 })
   deleted_by: string | null;
 
-  @ManyToOne(() => Company, (company) => company.employee, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
-  company: Company;
-
   @OneToMany(
-    () => EmployeeDependant,
-    (employee_dependant) => employee_dependant.employee,
+    () => ClientDependant,
+    (client_dependant) => client_dependant.client,
   )
-  employeeDependant: EmployeeDependant[];
+  clientDependant: ClientDependant[];
 }
