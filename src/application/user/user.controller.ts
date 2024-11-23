@@ -18,6 +18,8 @@ import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
 import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
 import { VerifyOtpDto } from './dto/get-user.dto';
+import { Roles } from '~/shared/decorator/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiBearerAuth()
 @ApiBasicAuth()
@@ -26,10 +28,15 @@ import { VerifyOtpDto } from './dto/get-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('qwe')
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'User registered successfully.')
-  async register(@Body() payload: CreateUserDto) {
-    const result = await this.userService.create(payload);
+  async register(
+    @UserJWT() userJWT: JwtPayload,
+    @Body() payload: CreateUserDto,
+  ) {
+    const result = await this.userService.create(payload, userJWT);
     return result;
   }
 

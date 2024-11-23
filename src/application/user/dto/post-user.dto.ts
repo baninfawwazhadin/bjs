@@ -16,7 +16,7 @@ export class CreateUserDto {
   @Length(1, 45)
   username: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters long.' })
   @Matches(/(?=.*[A-Z])/, {
@@ -28,7 +28,7 @@ export class CreateUserDto {
   @Matches(/(?=.*[!@#$%^&*(),.?":{}|<>])/, {
     message: 'Password must contain at least one special character.',
   })
-  password: string;
+  password?: string;
 
   @IsNotEmpty()
   @IsNumber()

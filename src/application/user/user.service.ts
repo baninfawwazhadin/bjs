@@ -14,6 +14,7 @@ import { Role } from '~/shared/entities/role.entity';
 import { UserOtp } from '~/shared/entities/user_otp.entity';
 import { EmailService } from '../email/email.service';
 import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
+import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class UserService {
@@ -26,7 +27,7 @@ export class UserService {
     this.userRepository = this.dataSource.getRepository(User);
   }
 
-  async create(payload: CreateUserDto) {
+  async create(payload: CreateUserDto, userJwt: JwtPayload) {
     try {
       const newUserPkId = await this.dataSource.transaction(async (manager) => {
         const roleRepository = manager.getRepository(Role);
@@ -42,12 +43,15 @@ export class UserService {
         }
 
         const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(payload.password, salt);
+        const hashedPassword = bcrypt.hashSync(
+          payload.password || `${process.env.DEFAULT_PASSWORD}`,
+          salt,
+        );
 
         const insertUserQuery = `
           INSERT INTO ${userTableName} 
-          (username, password, first_name, last_name, role_pkid, phone_number, email) 
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          (username, password, first_name, last_name, role_pkid, phone_number, email, created_by) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
         const parameters = [
           payload.username,
@@ -57,6 +61,7 @@ export class UserService {
           payload.role_pkid,
           payload.phone_number,
           payload.email,
+          userJwt.pkid,
         ];
 
         await manager.query(insertUserQuery, parameters);
