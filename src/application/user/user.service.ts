@@ -135,7 +135,7 @@ export class UserService {
 
     await userOtpRepository.update(foundOtp.pkid, { is_used: true });
 
-    return { message: 'OTP verified successfully.' };
+    return null;
   }
 
   async validateUser(username: string, password: string): Promise<User | null> {
@@ -244,39 +244,46 @@ export class UserService {
   }
 
   async forgetPassword(payload: ForgetPasswordDto) {
-    const userRepository = this.dataSource.getRepository(User);
-    const userOtpRepository = this.dataSource.getRepository(UserOtp);
+    await this.dataSource.transaction(async (manager) => {
+      const userRepository = manager.getRepository(User);
+      const userOtpRepository = manager.getRepository(UserOtp);
 
-    const foundUser = await userRepository.findOne({
-      where: {
-        username: payload.username,
-      },
-    });
+      const foundUser = await userRepository.findOne({
+        where: {
+          username: payload.username,
+        },
+      });
 
-    if (!foundUser) {
-      throw new NotFoundException('User not found.');
-    }
+      if (!foundUser) {
+        throw new NotFoundException('User not found.');
+      }
 
-    const foundOtp = await userOtpRepository.findOne({
-      where: { user_pkid: foundUser.pkid, is_used: true },
-    });
+      const foundOtp = await userOtpRepository.findOne({
+        where: { user_pkid: foundUser.pkid, is_used: true },
+      });
 
-    if (!foundOtp) {
-      throw new NotFoundException('OTP not found.');
-    }
+      if (!foundOtp) {
+        throw new NotFoundException('OTP not found.');
+      }
 
-    const isMatch = bcrypt.compareSync(payload.password, foundUser.password);
-    if (!isMatch) {
-      throw new ForbiddenException(
-        'New password cannot be same as old password.',
-      );
-    }
+      const isMatch = bcrypt.compareSync(payload.password, foundUser.password);
+      if (isMatch) {
+        throw new ForbiddenException(
+          'New password cannot be same as old password.',
+        );
+      }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(payload.password, salt);
+      const salt = bcrypt.genSaltSync(10);
+      const hashedPassword = bcrypt.hashSync(payload.password, salt);
 
-    await userRepository.update(foundUser.pkid, {
-      password: hashedPassword,
+      await userRepository.update(foundUser.pkid, {
+        password: hashedPassword,
+      });
+
+      await userOtpRepository.update(foundOtp.pkid, {
+        otp_code: null,
+        is_used: false,
+      });
     });
 
     return null;
