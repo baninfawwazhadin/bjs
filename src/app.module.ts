@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ApplicationModule } from './application/application.module';
 import { HelperModule } from './shared/helpers/helper.module';
+import { EmailModule } from './application/email/email.module';
 import { PayloadEncryptionMiddleware } from './shared/middleware/payload-encryption.middleware';
 
 @Module({
@@ -14,6 +15,7 @@ import { PayloadEncryptionMiddleware } from './shared/middleware/payload-encrypt
     }),
     ApplicationModule,
     HelperModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

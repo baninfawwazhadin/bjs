@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BasicAuthStrategy } from './strategies/basic.strategy';
+import { DatabaseModule } from '~/database/database.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BasicAuthStrategy } from './strategies/basic.strategy';
         signOptions: { expiresIn: configService.get('JWT_EXPIRY', '1h') },
       }),
     }),
+    DatabaseModule,
   ],
   providers: [AuthService, JwtStrategy, BasicAuthStrategy],
   controllers: [AuthController],

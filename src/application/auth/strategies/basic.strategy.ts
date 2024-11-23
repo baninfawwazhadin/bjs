@@ -5,17 +5,17 @@ import { BasicStrategy as Strategy } from 'passport-http';
 
 @Injectable()
 export class BasicAuthStrategy extends PassportStrategy(Strategy) {
-  private username: string;
-  private password: string;
+  private readonly username: string;
+  private readonly password: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     super();
     this.username = this.configService.get<string>(
       'BASIC_AUTH_USER',
       'defaultBasicUserBJS',
     );
     this.password = this.configService.get<string>(
-      'BASIC_AUTH_PASSWORD',
+      'BASIC_AUTH_PASS',
       'defaultBasicPasswordBJS',
     );
   }

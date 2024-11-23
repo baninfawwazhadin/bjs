@@ -1,10 +1,10 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Index('id', ['id'], { unique: true })
 @Index('email', ['email'], { unique: true })
 @Entity('user_dummy', { schema: 'db_bjs' })
 export class UserDummy {
-  @PrimaryGeneratedColumn({ type: 'bigint', name: 'id', unsigned: true })
+  @PrimaryColumn({ type: 'bigint' })
   id: string;
 
   @Column('varchar', { name: 'email', unique: true, length: 255 })
@@ -20,11 +20,11 @@ export class UserDummy {
     name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdAt: Date;
+  created_at: Date;
 
   @Column('timestamp', {
     name: 'updated_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  updatedAt: Date;
+  updated_at: Date;
 }
