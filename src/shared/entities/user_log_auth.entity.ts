@@ -1,14 +1,20 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('user_log_auth', { schema: 'db_bjs' })
 export class UserLogAuth {
-  @PrimaryColumn({ type: 'int' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   pkid: number;
 
-  @Column('varchar', { name: 'name', length: 45 })
+  @Column('varchar', {
+    name: 'name',
+    length: 45,
+  })
   name: string;
 
-  @Column('varchar', { name: 'username', length: 45 })
+  @Column('varchar', {
+    name: 'username',
+    length: 45,
+  })
   username: string;
 
   @Column('enum', {
@@ -17,15 +23,27 @@ export class UserLogAuth {
   })
   role: 'super admin' | 'admin order' | 'general manager';
 
-  @Column('date', { name: 'date' })
+  @Column('date', {
+    name: 'date',
+  })
   date: string;
 
-  @Column('datetime', { name: 'login_time', nullable: true })
+  @Column('datetime', {
+    name: 'login_time',
+    nullable: true,
+  })
   login_time: Date | null;
 
-  @Column('datetime', { name: 'logout_time', nullable: true })
+  @Column('datetime', {
+    name: 'logout_time',
+    nullable: true,
+  })
   logout_time: Date | null;
 
-  @Column('varchar', { name: 'login_status', nullable: true, length: 45 })
+  @Column('varchar', {
+    name: 'login_status',
+    nullable: true,
+    length: 45,
+  })
   login_status: string | null;
 }

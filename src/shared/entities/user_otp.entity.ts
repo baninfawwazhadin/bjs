@@ -4,7 +4,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -12,13 +12,20 @@ import { User } from './user.entity';
 @Index('user_otp_pkid_idx', ['user_pkid'], {})
 @Entity('user_otp', { schema: 'db_bjs' })
 export class UserOtp {
-  @PrimaryColumn({ type: 'int' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   pkid: number;
 
-  @Column('varchar', { name: 'user_pkid', length: 7 })
+  @Column('varchar', {
+    name: 'user_pkid',
+    length: 7,
+  })
   user_pkid: string;
 
-  @Column('varchar', { name: 'otp_code', nullable: true, length: 6 })
+  @Column('varchar', {
+    name: 'otp_code',
+    nullable: true,
+    length: 6,
+  })
   otp_code: string | null;
 
   @Column('datetime', {
@@ -28,7 +35,10 @@ export class UserOtp {
   })
   created_at: Date | null;
 
-  @Column('datetime', { name: 'expired_at', nullable: true })
+  @Column('datetime', {
+    name: 'expired_at',
+    nullable: true,
+  })
   expired_at: Date | null;
 
   @Column('tinyint', {

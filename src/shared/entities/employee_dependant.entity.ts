@@ -15,31 +15,56 @@ import { Employee } from './employee.entity';
 @Index('employeedependant_company_idx', ['company_pkid'], {})
 @Entity('employee_dependant', { schema: 'db_bjs' })
 export class EmployeeDependant {
-  @Column('int', { name: 'id', unique: true })
+  @Column('int', {
+    name: 'id',
+    unique: true,
+  })
   id: number;
 
   @PrimaryColumn({ type: 'varchar' })
   pkid: string;
 
-  @Column('varchar', { name: 'first_name', length: 20 })
+  @Column('varchar', {
+    name: 'first_name',
+    length: 20,
+  })
   first_name: string;
 
-  @Column('varchar', { name: 'last_name', length: 20 })
+  @Column('varchar', {
+    name: 'last_name',
+    length: 20,
+  })
   last_name: string;
 
-  @Column('varchar', { name: 'phone_number', length: 20 })
+  @Column('varchar', {
+    name: 'phone_number',
+    length: 20,
+  })
   phone_number: string;
 
-  @Column('varchar', { name: 'email', length: 50 })
+  @Column('varchar', {
+    name: 'email',
+    length: 50,
+  })
   email: string;
 
-  @Column('varchar', { name: 'employee_pkid', length: 10 })
+  @Column('varchar', {
+    name: 'employee_pkid',
+    length: 10,
+  })
   employee_pkid: string;
 
-  @Column('varchar', { name: 'company_pkid', length: 7 })
+  @Column('varchar', {
+    name: 'company_pkid',
+    length: 7,
+  })
   company_pkid: string;
 
-  @Column('tinyint', { name: 'is_active', width: 1, default: () => "'1'" })
+  @Column('tinyint', {
+    name: 'is_active',
+    width: 1,
+    default: () => "'1'",
+  })
   is_active: boolean;
 
   @Column('datetime', {
@@ -56,16 +81,31 @@ export class EmployeeDependant {
   })
   updated_at: Date | null;
 
-  @Column('datetime', { name: 'deleted_at', nullable: true })
+  @Column('datetime', {
+    name: 'deleted_at',
+    nullable: true,
+  })
   deleted_at: Date | null;
 
-  @Column('varchar', { name: 'created_by', nullable: true, length: 45 })
+  @Column('varchar', {
+    name: 'created_by',
+    nullable: true,
+    length: 45,
+  })
   created_by: string | null;
 
-  @Column('varchar', { name: 'updated_by', nullable: true, length: 45 })
+  @Column('varchar', {
+    name: 'updated_by',
+    nullable: true,
+    length: 45,
+  })
   updated_by: string | null;
 
-  @Column('varchar', { name: 'deleted_by', nullable: true, length: 45 })
+  @Column('varchar', {
+    name: 'deleted_by',
+    nullable: true,
+    length: 45,
+  })
   deleted_by: string | null;
 
   @ManyToOne(() => Company, (company) => company.employeeDependant, {
