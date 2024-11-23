@@ -112,17 +112,28 @@ export class UserService {
     }
   }
 
-  async verifyOtp(pkid: string, otp_code: string) {
+  async verifyOtp(username: string, otp_code: string) {
+    const userRepository = this.dataSource.getRepository(User);
     const userOtpRepository = this.dataSource.getRepository(UserOtp);
-    const otpRecord = await userOtpRepository.findOne({
-      where: { user_pkid: pkid, otp_code },
+
+    const foundUser = await userRepository.findOne({
+      where: {
+        username,
+      },
+    });
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const foundOtp = await userOtpRepository.findOne({
+      where: { user_pkid: foundUser.pkid, otp_code },
     });
 
-    if (!otpRecord || otpRecord.is_used) {
+    if (!foundOtp || foundOtp.is_used) {
       throw new ForbiddenException('Invalid or already used OTP.');
     }
 
-    await userOtpRepository.update(otpRecord.pkid, { is_used: true });
+    await userOtpRepository.update(foundOtp.pkid, { is_used: true });
 
     return { message: 'OTP verified successfully.' };
   }
