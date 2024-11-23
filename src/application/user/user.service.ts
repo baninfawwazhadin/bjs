@@ -168,7 +168,6 @@ export class UserService {
 
   async changePassword(user_pkid: string, payload: ChangePasswordDto) {
     const userRepository = this.dataSource.getRepository(User);
-    const userOtpRepository = this.dataSource.getRepository(UserOtp);
 
     const foundUser = await userRepository.findOne({
       where: {
@@ -180,16 +179,6 @@ export class UserService {
       throw new NotFoundException('User not found.');
     }
 
-    const foundOtp = await userOtpRepository.findOne({
-      where: [
-        { user_pkid, is_used: true },
-        { user_pkid, otp_code: '' },
-      ],
-    });
-
-    if (!foundOtp) {
-      throw new NotFoundException('OTP not found.');
-    }
     const isMatch = bcrypt.compareSync(
       payload.old_password,
       foundUser.password,

@@ -36,7 +36,12 @@ export class AuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(jwtPayload),
+      access_token: this.jwtService.sign(jwtPayload, {
+        expiresIn: process.env.JWT_EXPIRY ?? '1h',
+      }),
+      refresh_token: this.jwtService.sign(jwtPayload, {
+        expiresIn: '7d',
+      }),
     };
   }
 }
