@@ -1,5 +1,5 @@
 export interface JwtPayload {
-  pkid: number;
+  pkid: string;
   username: string;
   first_name: string;
   last_name: string;

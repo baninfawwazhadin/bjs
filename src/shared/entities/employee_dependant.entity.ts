@@ -4,30 +4,22 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { Company } from './company.entity';
-import { EmployeeDependant } from './employee_dependant.entity';
+import { Employee } from './employee.entity';
 
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
-@Index('phone_numer_UNIQUE', ['phone_number'], { unique: true })
-@Index('email_UNIQUE', ['email'], { unique: true })
-@Index('employee_company_pkid_idx', ['company_pkid'], {})
-@Entity('employee', { schema: 'db_bjs' })
-export class Employee {
+@Index('employeedependant_employee_pkid_idx', ['employee_pkid'], {})
+@Index('employeedependant_company_idx', ['company_pkid'], {})
+@Entity('employee_dependant', { schema: 'db_bjs' })
+export class EmployeeDependant {
   @Column('int', { name: 'id', unique: true })
   id: number;
 
   @PrimaryColumn({ type: 'varchar' })
   pkid: string;
-
-  @Column('enum', {
-    name: 'person_type',
-    enum: ['TKA', 'Dependant', 'Tamu', 'Lainnya'],
-  })
-  person_type: 'TKA' | 'Dependant' | 'Tamu' | 'Lainnya';
 
   @Column('varchar', { name: 'first_name', length: 20 })
   first_name: string;
@@ -35,11 +27,14 @@ export class Employee {
   @Column('varchar', { name: 'last_name', length: 20 })
   last_name: string;
 
-  @Column('varchar', { name: 'phone_number', unique: true, length: 20 })
+  @Column('varchar', { name: 'phone_number', length: 20 })
   phone_number: string;
 
-  @Column('varchar', { name: 'email', unique: true, length: 50 })
+  @Column('varchar', { name: 'email', length: 50 })
   email: string;
+
+  @Column('varchar', { name: 'employee_pkid', length: 10 })
+  employee_pkid: string;
 
   @Column('varchar', { name: 'company_pkid', length: 7 })
   company_pkid: string;
@@ -73,16 +68,17 @@ export class Employee {
   @Column('varchar', { name: 'deleted_by', nullable: true, length: 45 })
   deleted_by: string | null;
 
-  @ManyToOne(() => Company, (company) => company.employee, {
+  @ManyToOne(() => Company, (company) => company.employeeDependant, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })
   @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
   company: Company;
 
-  @OneToMany(
-    () => EmployeeDependant,
-    (employee_dependant) => employee_dependant.employee,
-  )
-  employeeDependant: EmployeeDependant[];
+  @ManyToOne(() => Employee, (employee) => employee.employeeDependant, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
+  @JoinColumn([{ name: 'employee_pkid', referencedColumnName: 'pkid' }])
+  employee: Employee;
 }

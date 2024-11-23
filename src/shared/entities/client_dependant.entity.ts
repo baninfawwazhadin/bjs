@@ -4,19 +4,16 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
 } from 'typeorm';
-import { Company } from './company.entity';
-import { EmployeeDependant } from './employee_dependant.entity';
+import { Client } from './client.entity';
 
 @Index('id_UNIQUE', ['id'], { unique: true })
-@Index('pkid_UNIQUE', ['pkid'], { unique: true })
-@Index('phone_numer_UNIQUE', ['phone_number'], { unique: true })
+@Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
 @Index('email_UNIQUE', ['email'], { unique: true })
-@Index('employee_company_pkid_idx', ['company_pkid'], {})
-@Entity('employee', { schema: 'db_bjs' })
-export class Employee {
+@Index('clientdependant_client_pkid_idx', ['client_pkid'], {})
+@Entity('client_dependant', { schema: 'db_bjs' })
+export class ClientDependant {
   @Column('int', { name: 'id', unique: true })
   id: number;
 
@@ -41,11 +38,16 @@ export class Employee {
   @Column('varchar', { name: 'email', unique: true, length: 50 })
   email: string;
 
-  @Column('varchar', { name: 'company_pkid', length: 7 })
-  company_pkid: string;
+  @Column('varchar', { name: 'client_pkid', length: 45 })
+  client_pkid: string;
 
-  @Column('tinyint', { name: 'is_active', width: 1, default: () => "'1'" })
-  is_active: boolean;
+  @Column('tinyint', {
+    name: 'is_active',
+    nullable: true,
+    width: 1,
+    default: () => "'1'",
+  })
+  is_active: boolean | null;
 
   @Column('datetime', {
     name: 'created_at',
@@ -73,16 +75,10 @@ export class Employee {
   @Column('varchar', { name: 'deleted_by', nullable: true, length: 45 })
   deleted_by: string | null;
 
-  @ManyToOne(() => Company, (company) => company.employee, {
+  @ManyToOne(() => Client, (client) => client.clientDependant, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })
-  @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
-  company: Company;
-
-  @OneToMany(
-    () => EmployeeDependant,
-    (employee_dependant) => employee_dependant.employee,
-  )
-  employeeDependant: EmployeeDependant[];
+  @JoinColumn([{ name: 'client_pkid', referencedColumnName: 'pkid' }])
+  client: Client;
 }
