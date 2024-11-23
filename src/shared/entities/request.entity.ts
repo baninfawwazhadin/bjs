@@ -1,12 +1,18 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
+@Index('pkid_UNIQUE', ['pkid'], { unique: true })
+@Index('name_UNIQUE', ['name'], { unique: true })
 @Entity('request', { schema: 'db_bjs' })
 export class Request {
-  @PrimaryColumn({ type: 'int' })
-  request_id: number;
+  @PrimaryGeneratedColumn({ type: 'int' })
+  pkid: number;
 
-  @Column('varchar', { name: 'request_name', length: 50 })
-  request_name: string;
+  @Column('varchar', {
+    name: 'name',
+    unique: true,
+    length: 50,
+  })
+  name: string;
 
   @Column('datetime', {
     name: 'created_at',
@@ -22,6 +28,9 @@ export class Request {
   })
   updated_at: Date | null;
 
-  @Column('datetime', { name: 'deleted_at', nullable: true })
+  @Column('datetime', {
+    name: 'deleted_at',
+    nullable: true,
+  })
   deleted_at: Date | null;
 }

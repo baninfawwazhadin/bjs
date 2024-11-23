@@ -28,8 +28,9 @@ export class UserService {
 
   async create(payload: CreateUserDto) {
     try {
-      const newUserId = await this.dataSource.transaction(async (manager) => {
+      const newUserPkId = await this.dataSource.transaction(async (manager) => {
         const roleRepository = manager.getRepository(Role);
+        const userTableName = manager.connection.getMetadata(User).tableName;
 
         const foundRole = await roleRepository.findOne({
           where: {
@@ -44,7 +45,7 @@ export class UserService {
         const hashedPassword = bcrypt.hashSync(payload.password, salt);
 
         const insertUserQuery = `
-          INSERT INTO user 
+          INSERT INTO ${userTableName} 
           (username, password, first_name, last_name, role_pkid, phone_number, email) 
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
@@ -60,25 +61,40 @@ export class UserService {
 
         await manager.query(insertUserQuery, parameters);
 
-        const pkidQuery = 'SELECT pkid FROM user WHERE username = ?';
-        const pkidResult = await manager.query(pkidQuery, [payload.username]);
+        const lastIdQuery = `
+          SELECT LAST_INSERT_ID() AS id;
+        `;
+        const lastIdResult = await manager.query(lastIdQuery);
 
-        const newUserId = pkidResult[0]?.pkid;
-        if (!newUserId) {
-          throw new InternalServerErrorException('Failed to create user.');
+        const lastInsertedId = lastIdResult[0]?.id;
+        if (!lastInsertedId) {
+          throw new InternalServerErrorException(
+            'Failed to retrieve last inserted ID.',
+          );
+        }
+
+        const pkidQuery = `
+          SELECT pkid FROM ${userTableName} WHERE id = ?;
+        `;
+        const pkidResult = await manager.query(pkidQuery, [lastInsertedId]);
+
+        const newUserPkId = pkidResult[0]?.pkid;
+        if (!newUserPkId) {
+          throw new InternalServerErrorException(
+            'Failed to retrieve pkid for the last inserted ID.',
+          );
         }
 
         const userOtpRepository = manager.getRepository(UserOtp);
         const newUserOtp = userOtpRepository.create({
-          user_pkid: newUserId,
-          pkid: 1,
+          user_pkid: newUserPkId,
         });
         await userOtpRepository.insert(newUserOtp);
 
-        return newUserId;
+        return newUserPkId;
       });
 
-      const result = this.findOneProfile(newUserId);
+      const result = this.findOneProfile(newUserPkId);
 
       return result;
     } catch (error) {
