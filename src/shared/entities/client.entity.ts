@@ -1,4 +1,13 @@
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import { ClientDependant } from './client_dependant.entity';
 
 @Index('id_UNIQUE', ['id'], { unique: true })
@@ -62,21 +71,21 @@ export class Client {
   })
   is_active: boolean | null;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
-  @Column('datetime', {
+  @DeleteDateColumn({
     name: 'deleted_at',
     nullable: true,
   })

@@ -4,13 +4,15 @@ import {
   Index,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('role_UNIQUE', ['name'], { unique: true })
-@Index('role_group_UNIQUE', ['group'], { unique: true })
 @Entity('role', { schema: 'db_bjs' })
 export class Role {
   @Column('int', {
@@ -22,57 +24,41 @@ export class Role {
   @PrimaryGeneratedColumn({ type: 'int' })
   pkid: number;
 
-  @Column('enum', {
+  @Column('varchar', {
     name: 'name',
     unique: true,
-    enum: [
-      'Super Admin',
-      'Admin Order',
-      'General Manager',
-      'Direksi',
-      'Kasir',
-      'Pelaksana',
-      'Filing',
-      'Biling',
-      'Accounting & Tax',
-      'Courier',
-    ],
+    length: 20,
   })
-  name:
-    | 'Super Admin'
-    | 'Admin Order'
-    | 'General Manager'
-    | 'Direksi'
-    | 'Kasir'
-    | 'Pelaksana'
-    | 'Filing'
-    | 'Biling'
-    | 'Accounting & Tax'
-    | 'Courier';
+  name: string;
+
+  @Column('varchar', {
+    name: 'description',
+    length: 50,
+  })
+  description: string;
 
   @Column('varchar', {
     name: 'group',
     nullable: true,
-    unique: true,
     length: 45,
   })
   group: string | null;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
-  @Column('datetime', {
+  @DeleteDateColumn({
     name: 'deleted_at',
     nullable: true,
   })

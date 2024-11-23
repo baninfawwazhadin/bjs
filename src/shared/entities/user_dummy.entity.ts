@@ -1,4 +1,11 @@
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Index('id', ['id'], { unique: true })
 @Index('email', ['email'], { unique: true })
@@ -26,13 +33,13 @@ export class UserDummy {
   })
   name: string;
 
-  @Column('timestamp', {
+  @CreateDateColumn({
     name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date;
 
-  @Column('timestamp', {
+  @UpdateDateColumn({
     name: 'updated_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
