@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -28,7 +29,7 @@ export class UserOtp {
   })
   otp_code: string | null;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',

@@ -1,4 +1,12 @@
-import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 
 @Index('pkid_UNIQUE', ['id'], { unique: true })
 @Index('PIC_id_UNIQUE', ['pkid'], { unique: true })
@@ -56,21 +64,21 @@ export class CompanyPic {
   })
   is_active: number;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
-  @Column('datetime', {
+  @DeleteDateColumn({
     name: 'deleted_at',
     nullable: true,
   })

@@ -24,6 +24,10 @@
       "~/*": ["*"]
     }
   },
-  "include": ["src/**/*.ts", "src/scripts/naming-strategy.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/scripts/naming-strategy.js",
+    "eslint.config.mjs"
+  ],
   "exclude": ["node_modules", "dist", "scripts", "config.*"]
 }

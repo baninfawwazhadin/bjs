@@ -4,6 +4,7 @@ import { Body,
   HttpStatus,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBasicAuth, ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
@@ -15,6 +16,9 @@ import { UserJWT } from '~/shared/decorator/user-jwt.decorator';
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
 import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
+import { VerifyOtpDto } from './dto/get-user.dto';
+import { Roles } from '~/shared/decorator/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @ApiBearerAuth()
 @ApiBasicAuth()
@@ -23,10 +27,15 @@ import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('qwe')
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'User registered successfully.')
-  async register(@Body() payload: CreateUserDto) {
-    const result = await this.userService.create(payload);
+  async register(
+    @UserJWT() userJWT: JwtPayload,
+    @Body() payload: CreateUserDto,
+  ) {
+    const result = await this.userService.create(payload, userJWT);
     return result;
   }
 
@@ -34,7 +43,18 @@ export class UserController {
   @Post('forget-password-submit')
   @ResponseMetadata(HttpStatus.ACCEPTED, 'OTP sent to email.')
   async forgetPasswordSubmit(@Body() payload: ForgetPasswordSubmitDto) {
-    return await this.userService.forgetPasswordSubmit(payload.username);
+    const result = await this.userService.forgetPasswordSubmit(
+      payload.username,
+    );
+    return result;
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Post('forget-password')
+  @ResponseMetadata(HttpStatus.ACCEPTED, 'Password changed successfully.')
+  async forgetPassword(@Body() payload: ForgetPasswordDto) {
+    const result = await this.userService.forgetPassword(payload);
+    return result;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -45,6 +65,17 @@ export class UserController {
     return result;
   }
 
+  @UseGuards(BasicAuthGuard)
+  @Get('verify-otp')
+  @ResponseMetadata(HttpStatus.ACCEPTED, 'OTP verified.')
+  async verifyOtp(@Query() query: VerifyOtpDto) {
+    const result = await this.userService.verifyOtp(
+      query.username,
+      query.otp_code,
+    );
+    return result;
+  }
+
   @UseGuards(JwtAuthGuard)
   @Put('change-password')
   @ResponseMetadata(HttpStatus.ACCEPTED, 'Password changed successfully.')
@@ -52,13 +83,7 @@ export class UserController {
     @UserJWT() userJWT: JwtPayload,
     @Body() payload: ChangePasswordDto,
   ) {
-    return await this.userService.changePassword(userJWT.pkid, payload);
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @Post('forget-password')
-  @ResponseMetadata(HttpStatus.ACCEPTED, 'Password changed successfully.')
-  async forgetPassword(@Body() payload: ForgetPasswordDto) {
-    return await this.userService.forgetPassword(payload);
+    const result = await this.userService.changePassword(userJWT.pkid, payload);
+    return result;
   }
 }

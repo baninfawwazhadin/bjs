@@ -5,6 +5,9 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Client } from './client.entity';
 
@@ -69,21 +72,21 @@ export class ClientDependant {
   })
   is_active: boolean | null;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
-  @Column('datetime', {
+  @DeleteDateColumn({
     name: 'deleted_at',
     nullable: true,
   })

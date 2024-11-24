@@ -1,4 +1,12 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
 @Index('name_UNIQUE', ['name'], { unique: true })
@@ -14,21 +22,21 @@ export class Request {
   })
   name: string;
 
-  @Column('datetime', {
+  @CreateDateColumn({
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date | null;
 
-  @Column('datetime', {
+  @UpdateDateColumn({
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
-  @Column('datetime', {
+  @DeleteDateColumn({
     name: 'deleted_at',
     nullable: true,
   })
