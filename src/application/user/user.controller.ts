@@ -1,4 +1,5 @@
-import { Body,
+import {
+  Body,
   Controller,
   Get,
   HttpStatus,
@@ -7,7 +8,7 @@ import { Body,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBasicAuth, ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CreateUserDto, ForgetPasswordSubmitDto } from './dto/post-user.dto';
 import { ResponseMetadata } from '~/shared/decorator/response.decorator';

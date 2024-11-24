@@ -15,13 +15,11 @@ import { Service } from './service.entity';
 @Index('pkid_UNIQUE', ['id'], { unique: true })
 @Entity('area', { schema: 'db_bjs' })
 export class Area {
-  @Column('int', {
-    name: 'id',
-    unique: true,
-  })
+  @Column()
+  @Generated('increment')
   id: number;
 
-  @PrimaryColumn({ type: 'varchar' })
+  @PrimaryColumn()
   pkid: string;
 
   @Column('varchar', {
@@ -42,6 +40,7 @@ export class Area {
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
