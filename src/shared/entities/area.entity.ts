@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Generated,
 } from 'typeorm';
 import { Service } from './service.entity';
 
