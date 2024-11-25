@@ -7,7 +7,6 @@ import {
   MinLength,
   Matches,
   IsNotEmpty,
-  IsNumber,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -31,8 +30,8 @@ export class CreateUserDto {
   password: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  role_pkid: number;
+  @IsString()
+  role_pkid: string;
 
   @IsNotEmpty()
   @IsString()

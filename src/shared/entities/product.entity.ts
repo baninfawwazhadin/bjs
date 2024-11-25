@@ -2,13 +2,11 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { Service } from './service.entity';
 
 @Index('product_id_UNIQUE', ['pkid'], { unique: true })
 @Index('pkid_UNIQUE', ['id'], { unique: true })
@@ -71,7 +69,4 @@ export class Product {
     length: 45,
   })
   deleted_by: string | null;
-
-  @OneToMany(() => Service, (service) => service.product)
-  service: Service[];
 }

@@ -111,17 +111,11 @@ export class EmployeeDependant {
   })
   deleted_by: string | null;
 
-  @ManyToOne(() => Company, (company) => company.employeeDependant, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Company)
   @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
   company: Company;
 
-  @ManyToOne(() => Employee, (employee) => employee.employeeDependant, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Employee)
   @JoinColumn([{ name: 'employee_pkid', referencedColumnName: 'pkid' }])
   employee: Employee;
 }

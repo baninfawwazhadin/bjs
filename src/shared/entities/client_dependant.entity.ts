@@ -113,10 +113,7 @@ export class ClientDependant {
   })
   deleted_by: string | null;
 
-  @ManyToOne(() => Client, (client) => client.clientDependant, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Client)
   @JoinColumn([{ name: 'client_pkid', referencedColumnName: 'pkid' }])
   client: Client;
 }

@@ -10,14 +10,7 @@ const relationName = (relation) => {
   );
 };
 
-const relationIdName = (relationId) => {
-  const columnOldName = relationId.fieldName;
-
-  return columnOldName;
-};
-
 module.exports = {
   fileName,
   relationName,
-  relationIdName,
 };

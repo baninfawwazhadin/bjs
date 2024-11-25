@@ -14,6 +14,7 @@ const password = process.env.DB_PASS ?? '';
 const dbType = process.env.DB_TYPE ?? 'mysql';
 
 const command = `typeorm-model-generator -h ${host} -d ${database} -u ${username} -x ${password} -e ${dbType} -o ${outputDir} --cf none --cp none  --namingStrategy=./src/scripts/naming-strategy.js `;
+console.log(command);
 
 process.chdir(rootDir);
 
