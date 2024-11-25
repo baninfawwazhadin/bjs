@@ -2,25 +2,30 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
+  JoinColumn,
+  ManyToOne,
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  Generated,
 } from 'typeorm';
-import { Service } from './service.entity';
+import { User } from './user.entity';
 
 @Index('area_name_UNIQUE', ['name'], { unique: true })
 @Index('area_id_UNIQUE', ['pkid'], { unique: true })
 @Index('pkid_UNIQUE', ['id'], { unique: true })
+@Index('area_createdby_pkid_idx', ['created_by'], {})
+@Index('area_updatedby_pkid_idx', ['updated_by'], {})
+@Index('area_deletedby_pkid_idx', ['deleted_by'], {})
 @Entity('area', { schema: 'db_bjs' })
 export class Area {
-  @Column()
-  @Generated('increment')
+  @Column('int', {
+    name: 'id',
+    unique: true,
+  })
   id: number;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ type: 'varchar' })
   pkid: string;
 
   @Column('varchar', {
@@ -41,7 +46,6 @@ export class Area {
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date | null;
 
@@ -54,24 +58,33 @@ export class Area {
   @Column('varchar', {
     name: 'created_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   created_by: string | null;
 
   @Column('varchar', {
     name: 'updated_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   updated_by: string | null;
 
   @Column('varchar', {
     name: 'deleted_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   deleted_by: string | null;
 
-  @OneToMany(() => Service, (service) => service.area)
-  service: Service[];
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'pkid' }])
+  createdBy: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'deleted_by', referencedColumnName: 'pkid' }])
+  deletedBy: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'updated_by', referencedColumnName: 'pkid' }])
+  updatedBy: User;
 }

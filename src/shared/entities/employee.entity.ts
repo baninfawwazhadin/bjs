@@ -4,14 +4,12 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
 import { Company } from './company.entity';
-import { EmployeeDependant } from './employee_dependant.entity';
 
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
@@ -115,16 +113,7 @@ export class Employee {
   })
   deleted_by: string | null;
 
-  @ManyToOne(() => Company, (company) => company.employee, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Company)
   @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
   company: Company;
-
-  @OneToMany(
-    () => EmployeeDependant,
-    (employee_dependant) => employee_dependant.employee,
-  )
-  employeeDependant: EmployeeDependant[];
 }

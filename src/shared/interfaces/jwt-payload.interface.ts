@@ -3,5 +3,5 @@ export interface JwtPayload {
   username: string;
   first_name: string;
   last_name: string;
-  role_pkid: number;
+  role_pkid: string;
 }

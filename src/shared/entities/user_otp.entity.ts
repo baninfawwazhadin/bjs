@@ -50,10 +50,7 @@ export class UserOtp {
   })
   is_used: boolean | null;
 
-  @ManyToOne(() => User, (user) => user.userOtp, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => User)
   @JoinColumn([{ name: 'user_pkid', referencedColumnName: 'pkid' }])
   user: User;
 }

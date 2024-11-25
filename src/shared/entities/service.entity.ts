@@ -120,24 +120,15 @@ export class Service {
   })
   deleted_by: string | null;
 
-  @ManyToOne(() => Area, (area) => area.service, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Area)
   @JoinColumn([{ name: 'area_pkid', referencedColumnName: 'pkid' }])
   area: Area;
 
-  @ManyToOne(() => Company, (company) => company.service, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Company)
   @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
   company: Company;
 
-  @ManyToOne(() => Product, (product) => product.service, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Product)
   @JoinColumn([{ name: 'product_pkid', referencedColumnName: 'pkid' }])
   product: Product;
 }

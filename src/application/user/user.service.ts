@@ -58,7 +58,7 @@ export class UserService {
           email: 'admin@gmail.com',
           phone_number: '628123456789',
           password: hashedPassword,
-          role_pkid: 1,
+          role_pkid: '1',
         },
         {
           reload: false,
@@ -77,7 +77,6 @@ export class UserService {
       const newUserPkId = await this.dataSource.transaction(async (manager) => {
         const userRepository = manager.getRepository(User);
         const roleRepository = manager.getRepository(Role);
-        const userTableName = manager.connection.getMetadata(User).tableName;
 
         const foundRole = await roleRepository.findOne({
           where: {
@@ -97,24 +96,10 @@ export class UserService {
           password: hashedPassword,
           created_by: userJwt.pkid,
         });
-        userRepository.save(newUser, { reload: false });
+        await userRepository.save(newUser, { reload: false });
 
-        const lastIdQuery = `
-          SELECT LAST_INSERT_ID() AS id;
-        `;
-        const lastIdResult = await manager.query(lastIdQuery);
-
-        const lastInsertedId = lastIdResult[0]?.id;
-        if (!lastInsertedId) {
-          throw new InternalServerErrorException(
-            'Failed to retrieve last inserted ID.',
-          );
-        }
-
-        const pkidQuery = `
-          SELECT pkid FROM ${userTableName} WHERE id = ?;
-        `;
-        const pkidResult = await manager.query(pkidQuery, [lastInsertedId]);
+        const pkidResult = await userRepository.find();
+        console.log(pkidResult);
 
         const newUserPkId = pkidResult[0]?.pkid;
         if (!newUserPkId) {
@@ -191,12 +176,11 @@ export class UserService {
         'phone_number',
         'email',
         'role',
-        'userOtp',
       ],
       where: {
         pkid,
       },
-      relations: ['role', 'userOtp'],
+      relations: ['role'],
     });
 
     if (!result) {

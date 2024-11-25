@@ -2,15 +2,11 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { Employee } from './employee.entity';
-import { EmployeeDependant } from './employee_dependant.entity';
-import { Service } from './service.entity';
 
 @Index('email_UNIQUE', ['email'], { unique: true })
 @Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
@@ -107,16 +103,4 @@ export class Company {
     length: 45,
   })
   deleted_by: string | null;
-
-  @OneToMany(() => Employee, (employee) => employee.company)
-  employee: Employee[];
-
-  @OneToMany(
-    () => EmployeeDependant,
-    (employee_dependant) => employee_dependant.company,
-  )
-  employeeDependant: EmployeeDependant[];
-
-  @OneToMany(() => Service, (service) => service.company)
-  service: Service[];
 }

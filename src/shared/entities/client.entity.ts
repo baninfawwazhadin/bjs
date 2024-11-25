@@ -2,13 +2,11 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { ClientDependant } from './client_dependant.entity';
 
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
@@ -111,10 +109,4 @@ export class Client {
     length: 45,
   })
   deleted_by: string | null;
-
-  @OneToMany(
-    () => ClientDependant,
-    (client_dependant) => client_dependant.client,
-  )
-  clientDependant: ClientDependant[];
 }

@@ -2,8 +2,9 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
-  PrimaryGeneratedColumn,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
@@ -13,6 +14,9 @@ import { User } from './user.entity';
 @Index('pkid_UNIQUE', ['pkid'], { unique: true })
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('role_UNIQUE', ['name'], { unique: true })
+@Index('role_createdby_pkid_idx', ['created_by'], {})
+@Index('role_updatedby_pkid_idx', ['updated_by'], {})
+@Index('role_deletedby_pkid_idx', ['deleted_by'], {})
 @Entity('role', { schema: 'db_bjs' })
 export class Role {
   @Column('int', {
@@ -21,8 +25,8 @@ export class Role {
   })
   id: number;
 
-  @PrimaryGeneratedColumn({ type: 'int' })
-  pkid: number;
+  @PrimaryColumn({ type: 'varchar' })
+  pkid: string;
 
   @Column('varchar', {
     name: 'name',
@@ -67,24 +71,33 @@ export class Role {
   @Column('varchar', {
     name: 'created_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   created_by: string | null;
 
   @Column('varchar', {
     name: 'updated_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   updated_by: string | null;
 
   @Column('varchar', {
     name: 'deleted_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   deleted_by: string | null;
 
-  @OneToMany(() => User, (user) => user.role)
-  user: User[];
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'pkid' }])
+  createdBy: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'deleted_by', referencedColumnName: 'pkid' }])
+  deletedBy: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'updated_by', referencedColumnName: 'pkid' }])
+  updatedBy: User;
 }

@@ -4,26 +4,28 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  Generated,
 } from 'typeorm';
 import { Role } from './role.entity';
-import { UserOtp } from './user_otp.entity';
 
 @Index('email_UNIQUE', ['email'], { unique: true })
 @Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
 @Index('user_id_UNIQUE', ['pkid'], { unique: true })
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('username_UNIQUE', ['username'], { unique: true })
-@Index('role_id_idx', ['role_pkid'], {})
+@Index('role_pkid_idx', ['role_pkid'], {})
+@Index('user_createdby_pkid_idx', ['created_by'], {})
+@Index('user_updatedby_pkid_idx', ['updated_by'], {})
+@Index('user_deletedby_pkid_idx', ['deleted_by'], {})
 @Entity('user', { schema: 'db_bjs' })
 export class User {
-  @Column()
-  @Generated('increment')
+  @Column('int', {
+    name: 'id',
+    unique: true,
+  })
   id: number;
 
   @PrimaryColumn({ type: 'varchar' })
@@ -54,10 +56,11 @@ export class User {
   })
   last_name: string;
 
-  @Column('int', {
+  @Column('varchar', {
     name: 'role_pkid',
+    length: 4,
   })
-  role_pkid: number;
+  role_pkid: string;
 
   @Column('varchar', {
     name: 'phone_number',
@@ -107,20 +110,6 @@ export class User {
   })
   is_user_active: boolean | null;
 
-  @Column('varchar', {
-    name: 'last_log_message',
-    nullable: true,
-    length: 500,
-  })
-  last_log_message: string | null;
-
-  @Column('enum', {
-    name: 'status',
-    nullable: true,
-    enum: ['LOGIN', 'LOGOUT'],
-  })
-  status: 'LOGIN' | 'LOGOUT' | null;
-
   @CreateDateColumn({
     name: 'created_at',
     nullable: true,
@@ -144,31 +133,37 @@ export class User {
   @Column('varchar', {
     name: 'created_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   created_by: string | null;
 
   @Column('varchar', {
     name: 'updated_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   updated_by: string | null;
 
   @Column('varchar', {
     name: 'deleted_by',
     nullable: true,
-    length: 45,
+    length: 7,
   })
   deleted_by: string | null;
 
-  @ManyToOne(() => Role, (role) => role.user, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
+  @ManyToOne(() => Role)
   @JoinColumn([{ name: 'role_pkid', referencedColumnName: 'pkid' }])
   role: Role;
 
-  @OneToMany(() => UserOtp, (user_otp) => user_otp.user)
-  userOtp: UserOtp[];
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'created_by', referencedColumnName: 'pkid' }])
+  createdBy: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'deleted_by', referencedColumnName: 'pkid' }])
+  deletedBy: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'updated_by', referencedColumnName: 'pkid' }])
+  updatedBy: User;
 }
