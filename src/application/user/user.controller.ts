@@ -29,7 +29,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('qwe')
+  @Roles('Super Admin')
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'User registered successfully.')
   async register(
