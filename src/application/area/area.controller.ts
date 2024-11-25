@@ -8,7 +8,7 @@ import {
   Post,
   Put,
   Query,
-  // UseGuards,
+  UseGuards,
 } from '@nestjs/common';
 import { AreaService } from './area.service';
 import { PostAreaDto } from './dto/post-area.dto';
@@ -16,13 +16,13 @@ import { PutAreaDto } from './dto/put-area.dto';
 import { Area } from '~/shared/entities/area.entity';
 import { GetAreaDto } from './dto/get-area.dto';
 import { ResponseMetadata } from '~/shared/decorator/response.decorator';
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('area')
 export class AreaController {
   constructor(private readonly areaService: AreaService) {}
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'Area added successfully.')
   async createArea(@Body() PostAreaDto: PostAreaDto) {
