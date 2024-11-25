@@ -15,21 +15,67 @@ import { UserOtp } from '~/shared/entities/user_otp.entity';
 import { EmailService } from '../email/email.service';
 import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
+import { HelperService } from '~/shared/helpers/helper.service';
 
 @Injectable()
 export class UserService {
   private readonly userRepository: Repository<User>;
+  private readonly userOtpRepository: Repository<UserOtp>;
 
   constructor(
     @Inject('DATA_SOURCE') private readonly dataSource: DataSource,
     private readonly emailService: EmailService,
+    private readonly helperService: HelperService,
   ) {
     this.userRepository = this.dataSource.getRepository(User);
+    this.userOtpRepository = this.dataSource.getRepository(UserOtp);
+  }
+
+  async checkMasterData() {
+    const foundAdmin = await this.userRepository.findOne({
+      where: {
+        username: 'admin',
+      },
+    });
+    if (foundAdmin) {
+      return false;
+    }
+    return true;
+  }
+
+  async generateMasterData() {
+    await this.dataSource.transaction(async (manager) => {
+      const userRepository = manager.getRepository(User);
+      const userOtpRepository = manager.getRepository(UserOtp);
+      const hashedPassword = await this.helperService.encryptBcrypt(
+        process.env.DEFAULT_PASSWORD ?? 'Admin123*',
+      );
+      await userRepository.save(
+        {
+          username: 'admin',
+          first_name: 'Admin',
+          last_name: 'Default',
+          email: 'admin@gmail.com',
+          phone_number: '628123456789',
+          password: hashedPassword,
+          role_pkid: 1,
+        },
+        {
+          reload: false,
+        },
+      );
+      const newUser = await userRepository.findOne({
+        where: { username: 'admin' },
+      });
+
+      await userOtpRepository.insert({ user_pkid: newUser?.pkid });
+    });
   }
 
   async create(payload: CreateUserDto, userJwt: JwtPayload) {
     try {
       const newUserPkId = await this.dataSource.transaction(async (manager) => {
+        const userRepository = manager.getRepository(User);
         const roleRepository = manager.getRepository(Role);
         const userTableName = manager.connection.getMetadata(User).tableName;
 
@@ -42,29 +88,16 @@ export class UserService {
           throw new BadRequestException('Role not found');
         }
 
-        const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(
-          payload.password || `${process.env.DEFAULT_PASSWORD}`,
-          salt,
+        const hashedPassword = await this.helperService.encryptBcrypt(
+          payload.password,
         );
 
-        const insertUserQuery = `
-          INSERT INTO ${userTableName} 
-          (username, password, first_name, last_name, role_pkid, phone_number, email, created_by) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        const parameters = [
-          payload.username,
-          hashedPassword,
-          payload.first_name,
-          payload.last_name,
-          payload.role_pkid,
-          payload.phone_number,
-          payload.email,
-          userJwt.pkid,
-        ];
-
-        await manager.query(insertUserQuery, parameters);
+        const newUser = userRepository.create({
+          ...payload,
+          password: hashedPassword,
+          created_by: userJwt.pkid,
+        });
+        userRepository.save(newUser, { reload: false });
 
         const lastIdQuery = `
           SELECT LAST_INSERT_ID() AS id;
@@ -118,10 +151,8 @@ export class UserService {
   }
 
   async verifyOtp(username: string, otp_code: string) {
-    const userRepository = this.dataSource.getRepository(User);
-    const userOtpRepository = this.dataSource.getRepository(UserOtp);
-
-    const foundUser = await userRepository.findOne({
+    const now = new Date();
+    const foundUser = await this.userRepository.findOne({
       where: {
         username,
       },
@@ -130,7 +161,7 @@ export class UserService {
       throw new NotFoundException('User not found.');
     }
 
-    const foundOtp = await userOtpRepository.findOne({
+    const foundOtp = await this.userOtpRepository.findOne({
       where: { user_pkid: foundUser.pkid, otp_code },
     });
 
@@ -138,23 +169,15 @@ export class UserService {
       throw new ForbiddenException('Invalid or already used OTP.');
     }
 
-    await userOtpRepository.update(foundOtp.pkid, { is_used: true });
-
-    return null;
-  }
-
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({
-      where: { username, is_user_active: true },
-    });
-
-    if (!user) {
-      return null;
+    if (foundOtp.expired_at) {
+      if (foundOtp.expired_at <= now) {
+        throw new ForbiddenException('OTP expired.');
+      }
     }
 
-    const isMatch = bcrypt.compareSync(password, user.password);
+    await this.userOtpRepository.update(foundOtp.pkid, { is_used: true });
 
-    return isMatch ? user : null;
+    return null;
   }
 
   async findOneProfile(pkid: string) {
@@ -171,7 +194,7 @@ export class UserService {
         'userOtp',
       ],
       where: {
-        pkid: pkid,
+        pkid,
       },
       relations: ['role', 'userOtp'],
     });
@@ -215,6 +238,8 @@ export class UserService {
 
   async forgetPasswordSubmit(username: string) {
     await this.dataSource.transaction(async (manager) => {
+      const now = new Date();
+
       const foundUser = await manager.getRepository(User).findOne({
         where: {
           username,
@@ -234,9 +259,11 @@ export class UserService {
         throw new NotFoundException('OTP not found.');
       }
 
+      now.setMinutes(now.getMinutes() + 5);
       const otp_code = Math.floor(100000 + Math.random() * 900000).toString();
       await userOtpRepository.update(foundOtp.pkid, {
         otp_code,
+        expired_at: now,
       });
 
       await this.emailService.sendEmail(

@@ -1,8 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { AdminService } from './application/admin/admin.service';
 
 @Injectable()
-export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+export class AppService implements OnModuleInit {
+  constructor(private readonly adminService: AdminService) {}
+
+  async onModuleInit() {
+    const checkMasterData = await this.adminService.checkMasterData();
+    if (checkMasterData) {
+      await this.adminService.generateMasterData();
+    }
   }
 }

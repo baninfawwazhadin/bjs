@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ApplicationModule } from './application/application.module';
 import { HelperModule } from './shared/helpers/helper.module';
-import { EmailModule } from './application/email/email.module';
+import { AdminModule } from './application/admin/admin.module';
 import { PayloadEncryptionMiddleware } from './shared/middleware/payload-encryption.middleware';
 import { AreaModule } from './application/area/area.module';
 
@@ -15,7 +15,7 @@ import { AreaModule } from './application/area/area.module';
     }),
     ApplicationModule,
     HelperModule,
-    EmailModule,
+    AdminModule,
     AreaModule,
   ],
   controllers: [AppController],

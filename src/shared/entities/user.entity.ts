@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Generated,
 } from 'typeorm';
 import { Role } from './role.entity';
 import { UserOtp } from './user_otp.entity';
@@ -21,10 +22,8 @@ import { UserOtp } from './user_otp.entity';
 @Index('role_id_idx', ['role_pkid'], {})
 @Entity('user', { schema: 'db_bjs' })
 export class User {
-  @Column('int', {
-    name: 'id',
-    unique: true,
-  })
+  @Column()
+  @Generated('increment')
   id: number;
 
   @PrimaryColumn({ type: 'varchar' })
