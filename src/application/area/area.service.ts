@@ -50,7 +50,6 @@ export class AreaService {
     }
 
     area.name = dto.name;
-    area.updated_by = 'Super Admin';
     return this.areaRepository.save(area);
   }
 
@@ -59,7 +58,6 @@ export class AreaService {
     if (!area) {
       throw new NotFoundException(`Area with ID '${pkid}' not found`);
     }
-    area.deleted_by = 'Super Admin';
     await this.areaRepository.save(area);
     await this.areaRepository.softDelete({ pkid });
   }
