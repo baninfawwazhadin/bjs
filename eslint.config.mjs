@@ -39,7 +39,6 @@ export default [
 
       parserOptions: {
         project: 'tsconfig.json',
-        tsconfigRootDir: 'C:\\Backend projects\\Onanmedia\\be-bjs',
       },
     },
 
