@@ -29,7 +29,7 @@ export class AreaController {
     return await this.areaService.createArea(PostAreaDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Put(':pkid')
   @ResponseMetadata(HttpStatus.ACCEPTED, 'Area updated successfully.')
   async updateArea(
@@ -39,14 +39,14 @@ export class AreaController {
     return this.areaService.updateArea(dto, pkid);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':pkid')
   @ResponseMetadata(HttpStatus.OK, 'Area deleted successfully.')
   async deleteArea(@Param('pkid') pkid: string): Promise<void> {
     await this.areaService.deleteArea(pkid);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ResponseMetadata(HttpStatus.OK, 'Data Area fetched successfully.')
   async getArea(@Query() GetAreaDto: GetAreaDto): Promise<Area | Area[]> {
