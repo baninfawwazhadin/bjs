@@ -56,7 +56,7 @@ export class AuthService {
 
     this.userService.logAuth({
       user: foundUser,
-      type: UserLogAuthType.LOGIN,
+      type: UserLogAuthType.Login,
     });
 
     return {
@@ -107,7 +107,7 @@ export class AuthService {
 
     this.userService.logAuth({
       user: foundUser,
-      type: UserLogAuthType.LOGOUT,
+      type: UserLogAuthType.Logout,
     });
 
     return true;

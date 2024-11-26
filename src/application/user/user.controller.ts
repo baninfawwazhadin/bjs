@@ -25,6 +25,8 @@ import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
 import { VerifyOtpDto } from './dto/get-user.dto';
 import { Roles } from '~/shared/decorator/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { User } from '~/shared/entities/user.entity';
+import { ApiStandardResponse } from '~/shared/helper/swagger.helper';
 
 @ApiBearerAuth()
 @ApiBasicAuth()
@@ -33,6 +35,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiStandardResponse(User, HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Super Admin')
   @Post()

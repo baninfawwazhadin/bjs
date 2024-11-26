@@ -17,7 +17,11 @@ import { Area } from '~/shared/entities/area.entity';
 import { GetAreaDto } from './dto/get-area.dto';
 import { ResponseMetadata } from '~/shared/decorator/response.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { GetTableDto } from '~/shared/dto/general.dto';
 
+@ApiBearerAuth()
+@ApiTags('Area')
 @Controller('area')
 export class AreaController {
   constructor(private readonly areaService: AreaService) {}
@@ -49,8 +53,16 @@ export class AreaController {
   @UseGuards(JwtAuthGuard)
   @Get()
   @ResponseMetadata(HttpStatus.OK, 'Data Area fetched successfully.')
-  async getArea(@Query() GetAreaDto: GetAreaDto): Promise<Area | Area[]> {
+  async getArea(@Query() query: GetTableDto) {
+    const result = await this.areaService.getArea(query);
+    return result;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('list')
+  @ResponseMetadata(HttpStatus.OK, 'Data Area fetched successfully.')
+  async getListArea(@Query() GetAreaDto: GetAreaDto): Promise<Area | Area[]> {
     const { pkid } = GetAreaDto;
-    return this.areaService.getArea(pkid);
+    return this.areaService.getListArea(pkid);
   }
 }

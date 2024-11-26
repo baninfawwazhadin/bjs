@@ -145,12 +145,7 @@ export class UserService {
   }
 
   async logAuth(payload: CreateUserLogAuth) {
-    if (payload.type === UserLogAuthType.LOGIN) {
-      // const newLog = this.userLogAuthRepository.create({
-      //   username: payload.user.username,
-      //   name: `${payload.user.first_name} ${payload.user.last_name}`,
-      //   login_time: new Date(),
-      // });
+    if (payload.type === UserLogAuthType.Login) {
       await this.userLogAuthRepository.insert({
         username: payload.user.username,
         name: `${payload.user.first_name} ${payload.user.last_name}`,

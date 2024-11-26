@@ -1,4 +1,9 @@
 export enum UserLogAuthType {
-  LOGIN = 'login',
-  LOGOUT = 'logout',
+  Login = 'login',
+  Logout = 'logout',
+}
+
+export enum SortType {
+  ASC = 'ASC',
+  DESC = 'DESC',
 }

@@ -3,11 +3,19 @@ import {
   Injectable,
   Inject,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
-import { DataSource, FindOptionsWhere, Not, Repository } from 'typeorm';
+import {
+  Brackets,
+  DataSource,
+  FindOptionsWhere,
+  Not,
+  Repository,
+} from 'typeorm';
 import { Area } from '~/shared/entities/area.entity';
 import { PostAreaDto } from './dto/post-area.dto';
 import { PutAreaDto } from './dto/put-area.dto';
+import { GetTableDto, ResultTable } from '~/shared/dto/general.dto';
 
 @Injectable()
 export class AreaService {
@@ -35,7 +43,16 @@ export class AreaService {
     }
 
     const newArea = this.areaRepository.create(dto);
-    return this.areaRepository.save(newArea, { reload: false });
+    await this.areaRepository.save(newArea, { reload: false });
+    const result = await this.areaRepository.findOne({
+      where: {
+        name: dto.name,
+      },
+    });
+    if (!result) {
+      throw new ConflictException(`Area not found after create.`);
+    }
+    return result;
   }
 
   async updateArea(dto: PutAreaDto, pkid: string): Promise<Area> {
@@ -58,11 +75,49 @@ export class AreaService {
     if (!area) {
       throw new NotFoundException(`Area with ID '${pkid}' not found`);
     }
-    await this.areaRepository.save(area);
     await this.areaRepository.softDelete({ pkid });
   }
 
-  async getArea(pkid?: string): Promise<Area | Area[]> {
+  async getArea(payload: GetTableDto) {
+    const page = (payload.page - 1) * payload.limit;
+    const keyword = payload.term ? payload.term.trim() : '';
+    const sql = this.areaRepository.createQueryBuilder('a').where('1 = 1');
+
+    if (keyword != '') {
+      sql.andWhere(
+        new Brackets((qb) => {
+          qb.where('a.name like :keyword', {
+            keyword: `%${keyword}%`,
+          });
+        }),
+      );
+    }
+
+    if (payload.sortBy) {
+      payload.sortBy =
+        payload.sortBy.split('.').length > 1
+          ? payload.sortBy
+          : `a.${payload.sortBy}`;
+      sql.orderBy(`${payload.sortBy}`, payload.sortType);
+    }
+
+    const count = await sql.getCount();
+    sql.offset(page);
+    sql.limit(payload.limit);
+    const resultData = await sql.getMany();
+
+    const result = new ResultTable();
+    const totalPagesRaw = count / payload.limit;
+
+    result.perPage = payload.limit;
+    result.currentPage = payload.page;
+    result.data = resultData;
+    result.totalItems = count;
+    result.totalPages = totalPagesRaw < 1 ? 1 : totalPagesRaw;
+    return result;
+  }
+
+  async getListArea(pkid?: string): Promise<Area | Area[]> {
     if (pkid) {
       const area = await this.areaRepository.findOne({ where: { pkid } });
       if (!area) {

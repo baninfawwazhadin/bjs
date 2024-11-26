@@ -14,6 +14,7 @@ import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 import { UserJWT } from '~/shared/decorator/user-jwt.decorator';
 import { LoginDto } from './dto/login.dto';
 import { ResponseMetadata } from '~/shared/decorator/response.decorator';
+import { ApiStandardResponse } from '~/shared/helper/swagger.helper';
 
 @ApiBearerAuth()
 @ApiBasicAuth()
@@ -21,8 +22,19 @@ import { ResponseMetadata } from '~/shared/decorator/response.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiStandardResponse(
+    {
+      type: 'object',
+      properties: {
+        access_token: { type: 'string' },
+        refresh_token: { type: 'string' },
+      },
+    },
+
+    HttpStatus.CREATED,
+  )
   @UseGuards(BasicAuthGuard)
-  @ResponseMetadata(HttpStatus.ACCEPTED, 'Login successfully.')
+  @ResponseMetadata(HttpStatus.CREATED, 'Login successfully.')
   @Post('login')
   async login(@Body() payload: LoginDto) {
     const result = await this.authService.login(payload);
