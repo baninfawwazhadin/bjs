@@ -7,6 +7,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BasicAuthStrategy } from './strategies/basic.strategy';
 import { DatabaseModule } from '~/database/database.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { DatabaseModule } from '~/database/database.module';
       }),
     }),
     DatabaseModule,
+    UserModule,
   ],
   providers: [AuthService, JwtStrategy, BasicAuthStrategy],
   controllers: [AuthController],

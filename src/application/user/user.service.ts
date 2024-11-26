@@ -7,20 +7,28 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { DataSource, Repository } from 'typeorm';
-import { CreateUserDto } from './dto/post-user.dto';
+import { DataSource, IsNull, Not, Repository } from 'typeorm';
+import { CreateUserDto, CreateUserLogAuth } from './dto/post-user.dto';
 import { User } from '~/shared/entities/user.entity';
+
 import { Role } from '~/shared/entities/role.entity';
 import { UserOtp } from '~/shared/entities/user_otp.entity';
 import { EmailService } from '../email/email.service';
-import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
+import {
+  ChangePasswordDto,
+  ForgetPasswordDto,
+  UpdateUserDto,
+} from './dto/put-user.dto';
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 import { HelperService } from '~/shared/helpers/helper.service';
+import { UserLogAuth } from '~/shared/entities/user_log_auth.entity';
+import { UserLogAuthType } from '../../shared/entities/enum.entity';
 
 @Injectable()
 export class UserService {
   private readonly userRepository: Repository<User>;
   private readonly userOtpRepository: Repository<UserOtp>;
+  private readonly userLogAuthRepository: Repository<UserLogAuth>;
 
   constructor(
     @Inject('DATA_SOURCE') private readonly dataSource: DataSource,
@@ -29,6 +37,7 @@ export class UserService {
   ) {
     this.userRepository = this.dataSource.getRepository(User);
     this.userOtpRepository = this.dataSource.getRepository(UserOtp);
+    this.userLogAuthRepository = this.dataSource.getRepository(UserLogAuth);
   }
 
   async checkMasterData() {
@@ -135,36 +144,41 @@ export class UserService {
     }
   }
 
-  async verifyOtp(username: string, otp_code: string) {
-    const now = new Date();
-    const foundUser = await this.userRepository.findOne({
+  async logAuth(payload: CreateUserLogAuth) {
+    if (payload.type === UserLogAuthType.LOGIN) {
+      // const newLog = this.userLogAuthRepository.create({
+      //   username: payload.user.username,
+      //   name: `${payload.user.first_name} ${payload.user.last_name}`,
+      //   login_time: new Date(),
+      // });
+      await this.userLogAuthRepository.insert({
+        username: payload.user.username,
+        name: `${payload.user.first_name} ${payload.user.last_name}`,
+        date: new Date(),
+        login_time: new Date(),
+      });
+      return true;
+    }
+
+    const foundLog = await this.userLogAuthRepository.findOne({
       where: {
-        username,
+        username: payload.user.username,
+        login_time: Not(IsNull()),
+        logout_time: IsNull(),
+      },
+      order: {
+        date: 'DESC',
       },
     });
-    if (!foundUser) {
-      throw new NotFoundException('User not found.');
+
+    if (!foundLog) {
+      throw new BadRequestException('Logout without login.');
     }
 
-    const foundOtp = await this.userOtpRepository.findOne({
-      where: { user_pkid: foundUser.pkid, otp_code },
-    });
-
-    if (!foundOtp || foundOtp.is_used) {
-      throw new ForbiddenException('Invalid or already used OTP.');
-    }
-
-    if (foundOtp.expired_at) {
-      if (foundOtp.expired_at <= now) {
-        throw new ForbiddenException('OTP expired.');
-      }
-    }
-
-    await this.userOtpRepository.update(foundOtp.pkid, { is_used: true });
-
-    return null;
+    foundLog.logout_time = new Date();
+    await this.userLogAuthRepository.update(foundLog.pkid, foundLog);
+    return true;
   }
-
   async findOneProfile(pkid: string) {
     const result = await this.userRepository.findOne({
       select: [
@@ -189,12 +203,35 @@ export class UserService {
     return result;
   }
 
-  async changePassword(user_pkid: string, payload: ChangePasswordDto) {
+  async update(
+    pkid: string,
+    payload: UpdateUserDto,
+    userJwt: JwtPayload | null = null,
+  ) {
+    const foundUser = await this.userRepository.findOne({
+      where: {
+        pkid,
+      },
+    });
+
+    if (!foundUser) {
+      throw new ForbiddenException('User not found.');
+    }
+
+    const updateData = {
+      ...payload,
+      updated_by: userJwt ? userJwt.pkid : null,
+    };
+    const result = await this.userRepository.update(pkid, updateData);
+    return result;
+  }
+
+  async changePassword(pkid: string, payload: ChangePasswordDto) {
     const userRepository = this.dataSource.getRepository(User);
 
     const foundUser = await userRepository.findOne({
       where: {
-        pkid: user_pkid,
+        pkid: pkid,
       },
     });
 
@@ -213,7 +250,7 @@ export class UserService {
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(payload.new_password, salt);
 
-    await userRepository.update(user_pkid, {
+    await userRepository.update(pkid, {
       password: hashedPassword,
     });
 
@@ -301,6 +338,36 @@ export class UserService {
         is_used: false,
       });
     });
+
+    return null;
+  }
+
+  async verifyOtp(username: string, otp_code: string) {
+    const now = new Date();
+    const foundUser = await this.userRepository.findOne({
+      where: {
+        username,
+      },
+    });
+    if (!foundUser) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const foundOtp = await this.userOtpRepository.findOne({
+      where: { user_pkid: foundUser.pkid, otp_code },
+    });
+
+    if (!foundOtp || foundOtp.is_used) {
+      throw new ForbiddenException('Invalid or already used OTP.');
+    }
+
+    if (foundOtp.expired_at) {
+      if (foundOtp.expired_at <= now) {
+        throw new ForbiddenException('OTP expired.');
+      }
+    }
+
+    await this.userOtpRepository.update(foundOtp.pkid, { is_used: true });
 
     return null;
   }

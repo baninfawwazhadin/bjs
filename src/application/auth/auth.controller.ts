@@ -29,6 +29,14 @@ export class AuthController {
     return result;
   }
 
+  @UseGuards(BasicAuthGuard)
+  @ResponseMetadata(HttpStatus.ACCEPTED, 'Logout successfully.')
+  @Post('logout')
+  async logout(@UserJWT() userJWT: JwtPayload) {
+    const result = await this.authService.logout(userJWT.pkid);
+    return result;
+  }
+
   @UseGuards(JwtAuthGuard)
   @ResponseMetadata(HttpStatus.ACCEPTED, 'User JWT.')
   @Get('jwt')

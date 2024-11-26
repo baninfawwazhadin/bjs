@@ -23,10 +23,11 @@ export class UserLogAuth {
   })
   role: 'super admin' | 'admin order' | 'general manager';
 
-  @Column('date', {
+  @Column('datetime', {
     name: 'date',
+    nullable: true,
   })
-  date: string;
+  date: Date | null;
 
   @Column('datetime', {
     name: 'login_time',

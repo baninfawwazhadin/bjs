@@ -1,4 +1,6 @@
 import { IsNotEmpty, IsString, MinLength, Matches } from 'class-validator';
+import { CreateUserDto } from './post-user.dto';
+import { PartialType } from '@nestjs/swagger';
 
 export class ChangePasswordDto {
   @IsNotEmpty()
@@ -39,3 +41,5 @@ export class ForgetPasswordDto {
   })
   password: string;
 }
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}

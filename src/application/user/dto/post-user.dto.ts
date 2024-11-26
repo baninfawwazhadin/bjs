@@ -8,6 +8,8 @@ import {
   Matches,
   IsNotEmpty,
 } from 'class-validator';
+import { User } from '~/shared/entities/user.entity';
+import { UserLogAuthType } from '~/shared/entities/enum.entity';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -50,10 +52,18 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsEmail({}, { message: 'Invalid email format' })
   email: string;
+
+  @IsOptional()
+  password_attempt_counter?: number;
 }
 
 export class ForgetPasswordSubmitDto {
   @IsNotEmpty()
   @IsString()
   username: string;
+}
+
+export class CreateUserLogAuth {
+  user: User;
+  type: UserLogAuthType;
 }

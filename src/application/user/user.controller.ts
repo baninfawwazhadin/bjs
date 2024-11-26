@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Put,
   Query,
@@ -15,7 +16,11 @@ import { ResponseMetadata } from '~/shared/decorator/response.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserJWT } from '~/shared/decorator/user-jwt.decorator';
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
-import { ChangePasswordDto, ForgetPasswordDto } from './dto/put-user.dto';
+import {
+  ChangePasswordDto,
+  ForgetPasswordDto,
+  UpdateUserDto,
+} from './dto/put-user.dto';
 import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
 import { VerifyOtpDto } from './dto/get-user.dto';
 import { Roles } from '~/shared/decorator/roles.decorator';
@@ -85,6 +90,19 @@ export class UserController {
     @Body() payload: ChangePasswordDto,
   ) {
     const result = await this.userService.changePassword(userJWT.pkid, payload);
+    return result;
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Super Admin')
+  @Put(':pkid')
+  @ResponseMetadata(HttpStatus.ACCEPTED, 'User updated successfully.')
+  async update(
+    @Param('pkid') pkid: string,
+    @UserJWT() userJWT: JwtPayload,
+    @Body() payload: UpdateUserDto,
+  ) {
+    const result = await this.userService.update(pkid, payload, userJWT);
     return result;
   }
 }
