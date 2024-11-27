@@ -9,6 +9,7 @@ import { PayloadEncryptionMiddleware } from './shared/middleware/payload-encrypt
 import { AreaModule } from './application/area/area.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
+import { RequestTypeModule } from './application/request-type/request-type.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import * as redisStore from 'cache-manager-redis-store';
     HelperModule,
     AdminModule,
     AreaModule,
+    RequestTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
