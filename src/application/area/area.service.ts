@@ -24,7 +24,7 @@ export class AreaService {
     this.areaRepository = this.dataSource.getRepository(Area);
   }
 
-  private async isNameTaken(
+  private async isNameUnique(
     name: string,
     excludePkid?: string,
   ): Promise<boolean> {
@@ -33,11 +33,11 @@ export class AreaService {
       whereCondition.pkid = Not(excludePkid);
     }
     const count = await this.areaRepository.count({ where: whereCondition });
-    return count < 1;
+    return count === 0;
   }
 
   async createArea(dto: PostAreaDto): Promise<Area> {
-    const isUnique = await this.isNameTaken(dto.name);
+    const isUnique = await this.isNameUnique(dto.name);
     if (!isUnique) {
       throw new BadRequestException(`The name '${dto.name}' is already taken.`);
     }
@@ -61,7 +61,7 @@ export class AreaService {
       throw new NotFoundException(`Area with ID '${pkid}' not found`);
     }
 
-    const isUnique = await this.isNameTaken(dto.name, pkid);
+    const isUnique = await this.isNameUnique(dto.name, pkid);
     if (!isUnique) {
       throw new BadRequestException(`The name '${dto.name}' is already taken.`);
     }

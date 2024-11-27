@@ -24,7 +24,7 @@ export class ProductService {
     this.productRepository = this.dataSource.getRepository(Product);
   }
 
-  private async isNameTaken(
+  private async isNameUnique(
     name: string,
     excludePkid?: string,
   ): Promise<boolean> {
@@ -35,11 +35,12 @@ export class ProductService {
     const count = await this.productRepository.count({
       where: whereCondition,
     });
-    return count < 1;
+    console.log(count);
+    return count === 0;
   }
 
   async createProduct(dto: PostProductDto): Promise<Product> {
-    const isUnique = await this.isNameTaken(dto.name);
+    const isUnique = await this.isNameUnique(dto.name);
     if (!isUnique) {
       throw new BadRequestException(`The name '${dto.name}' is already taken.`);
     }
@@ -65,7 +66,7 @@ export class ProductService {
       throw new NotFoundException(`Product with ID '${pkid}' not found`);
     }
 
-    const isUnique = await this.isNameTaken(dto.name, pkid);
+    const isUnique = await this.isNameUnique(dto.name, pkid);
     if (!isUnique) {
       throw new BadRequestException(`The name '${dto.name}' is already taken.`);
     }

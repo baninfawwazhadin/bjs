@@ -51,17 +51,21 @@ export class Company {
   })
   NPWP: string;
 
-  @Column('enum', {
-    name: 'PPN',
-    enum: ['Include', 'Exclude'],
+  @Column('tinyint', {
+    name: 'is_PPN_included',
+    nullable: true,
+    width: 1,
+    default: () => "'1'",
   })
-  PPN: 'Include' | 'Exclude';
+  is_PPN_included: boolean | null;
 
-  @Column('enum', {
-    name: 'status',
-    enum: ['Aktif', 'Tidak Aktif'],
+  @Column('tinyint', {
+    name: 'is_active',
+    nullable: true,
+    width: 1,
+    default: () => "'1'",
   })
-  status: 'Aktif' | 'Tidak Aktif';
+  is_active: boolean | null;
 
   @CreateDateColumn({
     name: 'created_at',

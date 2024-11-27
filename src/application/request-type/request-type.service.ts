@@ -24,7 +24,7 @@ export class RequestTypeService {
     this.requestTypeRepository = this.dataSource.getRepository(RequestType);
   }
 
-  private async isNameTaken(
+  private async isNameUnique(
     name: string,
     excludePkid?: string,
   ): Promise<boolean> {
@@ -35,11 +35,11 @@ export class RequestTypeService {
     const count = await this.requestTypeRepository.count({
       where: whereCondition,
     });
-    return count < 1;
+    return count === 0;
   }
 
   async createRequestType(dto: PostRequestTypeDto): Promise<RequestType> {
-    const isUnique = await this.isNameTaken(dto.name);
+    const isUnique = await this.isNameUnique(dto.name);
     if (!isUnique) {
       throw new BadRequestException(`The name '${dto.name}' is already taken.`);
     }
@@ -68,7 +68,7 @@ export class RequestTypeService {
       throw new NotFoundException(`Request Type with ID '${pkid}' not found`);
     }
 
-    const isUnique = await this.isNameTaken(dto.name, pkid);
+    const isUnique = await this.isNameUnique(dto.name, pkid);
     if (!isUnique) {
       throw new BadRequestException(`The name '${dto.name}' is already taken.`);
     }
