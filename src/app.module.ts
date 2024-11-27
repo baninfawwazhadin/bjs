@@ -10,6 +10,7 @@ import { AreaModule } from './application/area/area.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
 import { RequestTypeModule } from './application/request-type/request-type.module';
+import { ProductModule } from './application/product/product.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RequestTypeModule } from './application/request-type/request-type.modul
     AdminModule,
     AreaModule,
     RequestTypeModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

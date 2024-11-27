@@ -29,8 +29,8 @@ export class AreaController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'Area added successfully.')
-  async createArea(@Body() PostAreaDto: PostAreaDto) {
-    return await this.areaService.createArea(PostAreaDto);
+  async createArea(@Body() postAreaDto: PostAreaDto) {
+    return await this.areaService.createArea(postAreaDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -61,8 +61,8 @@ export class AreaController {
   @UseGuards(JwtAuthGuard)
   @Get('list')
   @ResponseMetadata(HttpStatus.OK, 'Data Area fetched successfully.')
-  async getListArea(@Query() GetAreaDto: GetAreaDto): Promise<Area | Area[]> {
-    const { pkid } = GetAreaDto;
+  async getListArea(@Query() getAreaDto: GetAreaDto): Promise<Area | Area[]> {
+    const { pkid } = getAreaDto;
     return this.areaService.getListArea(pkid);
   }
 }

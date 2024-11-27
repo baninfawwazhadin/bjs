@@ -29,9 +29,8 @@ export class RequestTypeController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'Request Type added successfully.')
-  async createRequestType(@Body() PostRequestTypeDto: PostRequestTypeDto) {
-    console.log(PostRequestTypeDto);
-    return await this.requestTypeService.createRequestType(PostRequestTypeDto);
+  async createRequestType(@Body() postRequestTypeDto: PostRequestTypeDto) {
+    return await this.requestTypeService.createRequestType(postRequestTypeDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -63,9 +62,9 @@ export class RequestTypeController {
   @Get('list')
   @ResponseMetadata(HttpStatus.OK, 'Data Request Type fetched successfully.')
   async getListRequestType(
-    @Query() GetRequestTypeDto: GetRequestTypeDto,
+    @Query() getRequestTypeDto: GetRequestTypeDto,
   ): Promise<RequestType | RequestType[]> {
-    const { pkid } = GetRequestTypeDto;
+    const { pkid } = getRequestTypeDto;
     return this.requestTypeService.getListRequestType(pkid);
   }
 }
