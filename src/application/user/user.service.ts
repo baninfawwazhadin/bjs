@@ -10,7 +10,6 @@ import * as bcrypt from 'bcryptjs';
 import { DataSource, IsNull, Not, Repository } from 'typeorm';
 import { CreateUserDto, CreateUserLogAuth } from './dto/post-user.dto';
 import { User } from '~/shared/entities/user.entity';
-
 import { Role } from '~/shared/entities/role.entity';
 import { UserOtp } from '~/shared/entities/user_otp.entity';
 import { EmailService } from '../email/email.service';
@@ -22,7 +21,7 @@ import {
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 import { HelperService } from '~/shared/helpers/helper.service';
 import { UserLogAuth } from '~/shared/entities/user_log_auth.entity';
-import { UserLogAuthType } from '../../shared/entities/enum.entity';
+import { UserLogAuthType } from '~/shared/entities/enum.entity';
 
 @Injectable()
 export class UserService {
@@ -43,7 +42,7 @@ export class UserService {
   async checkMasterData() {
     const foundAdmin = await this.userRepository.findOne({
       where: {
-        username: 'admin',
+        pkid: 'BJSA001',
       },
     });
     if (foundAdmin) {
@@ -53,31 +52,28 @@ export class UserService {
   }
 
   async generateMasterData() {
+    const check = await this.checkMasterData();
+    if (!check) {
+      return;
+    }
     await this.dataSource.transaction(async (manager) => {
       const userRepository = manager.getRepository(User);
       const userOtpRepository = manager.getRepository(UserOtp);
       const hashedPassword = await this.helperService.encryptBcrypt(
         process.env.DEFAULT_PASSWORD ?? 'Admin123*',
       );
-      await userRepository.save(
-        {
-          username: 'admin',
-          first_name: 'Admin',
-          last_name: 'Default',
-          email: 'admin@gmail.com',
-          phone_number: '628123456789',
-          password: hashedPassword,
-          role_pkid: '1',
-        },
-        {
-          reload: false,
-        },
-      );
-      const newUser = await userRepository.findOne({
-        where: { username: 'admin' },
+      await userRepository.insert({
+        pkid: 'BJSA001',
+        username: 'admin',
+        first_name: 'Admin',
+        last_name: 'Default',
+        email: 'admin@gmail.com',
+        phone_number: '628123456789',
+        password: hashedPassword,
+        role_pkid: 'R001',
       });
 
-      await userOtpRepository.insert({ user_pkid: newUser?.pkid });
+      await userOtpRepository.insert({ user_pkid: 'BJSA001' });
     });
   }
 

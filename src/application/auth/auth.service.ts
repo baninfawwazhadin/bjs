@@ -6,7 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { User } from '~/shared/entities/user.entity';
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
 import { UserService } from '../user/user.service';
-import { UserLogAuthType } from '../../shared/entities/enum.entity';
+import { UserLogAuthType } from '~/shared/entities/enum.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 

@@ -6,9 +6,6 @@ export class AppService implements OnModuleInit {
   constructor(private readonly adminService: AdminService) {}
 
   async onModuleInit() {
-    const checkMasterData = await this.adminService.checkMasterData();
-    if (checkMasterData) {
-      await this.adminService.generateMasterData();
-    }
+    await this.adminService.generateMasterData();
   }
 }
