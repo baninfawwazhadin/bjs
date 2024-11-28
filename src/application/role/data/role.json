@@ -1,0 +1,5 @@
+[
+  { "pkid": "R001", "name": "Super Admin" },
+  { "pkid": "R002", "name": "Admin Order" },
+  { "pkid": "R003", "name": "General Manager" }
+]

@@ -7,5 +7,6 @@ import { DatabaseModule } from '~/database/database.module';
   imports: [DatabaseModule],
   providers: [AreaService],
   controllers: [AreaController],
+  exports: [AreaService],
 })
 export class AreaModule {}

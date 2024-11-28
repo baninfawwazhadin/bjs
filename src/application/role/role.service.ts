@@ -8,6 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Role } from '~/shared/entities/role.entity';
 import { UpdateRoleDto } from './dto/put-role.dto';
 import { JwtPayload } from '~/shared/interfaces/jwt-payload.interface';
+import MasterDataRole from './data/role.json';
 
 @Injectable()
 export class RoleService {
@@ -30,28 +31,16 @@ export class RoleService {
   }
 
   async generateMasterData() {
-    const check = await this.checkMasterData();
-    if (!check) {
-      return;
-    }
     await this.dataSource.transaction(async (manager) => {
       const roleRepository = manager.getRepository(Role);
 
-      await roleRepository.insert({
-        pkid: 'R001',
-        name: 'Super Admin',
-        description: 'Super Admin',
-      });
-      await roleRepository.insert({
-        pkid: 'R002',
-        name: 'Admin Order',
-        description: 'Admin Order',
-      });
-      await roleRepository.insert({
-        pkid: 'R003',
-        name: 'General Manager',
-        description: 'General Manager',
-      });
+      for (const data of MasterDataRole) {
+        await roleRepository.save({
+          pkid: data.pkid,
+          name: data.name,
+          description: data.name,
+        });
+      }
     });
   }
 

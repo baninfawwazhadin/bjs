@@ -16,12 +16,38 @@ import { Area } from '~/shared/entities/area.entity';
 import { PostAreaDto } from './dto/post-area.dto';
 import { PutAreaDto } from './dto/put-area.dto';
 import { GetTableDto, ResultTable } from '~/shared/dto/general.dto';
+import MasterDataProvince from './data/province.json';
 
 @Injectable()
 export class AreaService {
   private readonly areaRepository: Repository<Area>;
   constructor(@Inject('DATA_SOURCE') private readonly dataSource: DataSource) {
     this.areaRepository = this.dataSource.getRepository(Area);
+  }
+
+  async checkMasterData() {
+    const foundMaster = await this.areaRepository.findOne({
+      where: {
+        pkid: 'A001',
+      },
+    });
+    if (foundMaster) {
+      return false;
+    }
+    return true;
+  }
+
+  async generateMasterData() {
+    await this.dataSource.transaction(async (manager) => {
+      const areaRepository = manager.getRepository(Area);
+
+      for (const data of MasterDataProvince) {
+        await areaRepository.save({
+          pkid: data.pkid,
+          name: data.name,
+        });
+      }
+    });
   }
 
   private async isNameUnique(
