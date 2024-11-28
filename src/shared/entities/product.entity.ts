@@ -30,6 +30,7 @@ export class Product {
   name: string;
 
   @CreateDateColumn({
+    select: false,
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
@@ -37,6 +38,7 @@ export class Product {
   created_at: Date | null;
 
   @UpdateDateColumn({
+    select: false,
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
@@ -44,12 +46,14 @@ export class Product {
   updated_at: Date | null;
 
   @DeleteDateColumn({
+    select: false,
     name: 'deleted_at',
     nullable: true,
   })
   deleted_at: Date | null;
 
   @Column('varchar', {
+    select: false,
     name: 'created_by',
     nullable: true,
     length: 45,
@@ -57,6 +61,7 @@ export class Product {
   created_by: string | null;
 
   @Column('varchar', {
+    select: false,
     name: 'updated_by',
     nullable: true,
     length: 45,
@@ -64,6 +69,7 @@ export class Product {
   updated_by: string | null;
 
   @Column('varchar', {
+    select: false,
     name: 'deleted_by',
     nullable: true,
     length: 45,

@@ -23,6 +23,7 @@ export class Request {
   name: string;
 
   @CreateDateColumn({
+    select: false,
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
@@ -30,6 +31,7 @@ export class Request {
   created_at: Date | null;
 
   @UpdateDateColumn({
+    select: false,
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
@@ -37,6 +39,7 @@ export class Request {
   updated_at: Date | null;
 
   @DeleteDateColumn({
+    select: false,
     name: 'deleted_at',
     nullable: true,
   })

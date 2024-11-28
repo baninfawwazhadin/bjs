@@ -30,6 +30,7 @@ export class UserOtp {
   otp_code: string | null;
 
   @CreateDateColumn({
+    select: false,
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',

@@ -28,33 +28,12 @@ export class Role {
   @PrimaryColumn({ type: 'varchar' })
   pkid: string;
 
-  @Column('enum', {
+  @Column('varchar', {
     name: 'name',
     unique: true,
-    enum: [
-      'Super Admin',
-      'Admin Order',
-      'General Manager',
-      'Direksi',
-      'Kasir',
-      'Pelaksana',
-      'Filing',
-      'Biling',
-      'Accounting & Tax',
-      'Courier',
-    ],
+    length: 20,
   })
-  name:
-    | 'Super Admin'
-    | 'Admin Order'
-    | 'General Manager'
-    | 'Direksi'
-    | 'Kasir'
-    | 'Pelaksana'
-    | 'Filing'
-    | 'Biling'
-    | 'Accounting & Tax'
-    | 'Courier';
+  name: string;
 
   @Column('varchar', {
     name: 'description',
@@ -70,6 +49,7 @@ export class Role {
   group: string | null;
 
   @CreateDateColumn({
+    select: false,
     name: 'created_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
@@ -77,6 +57,7 @@ export class Role {
   created_at: Date | null;
 
   @UpdateDateColumn({
+    select: false,
     name: 'updated_at',
     nullable: true,
     default: () => 'CURRENT_TIMESTAMP',
@@ -84,12 +65,14 @@ export class Role {
   updated_at: Date | null;
 
   @DeleteDateColumn({
+    select: false,
     name: 'deleted_at',
     nullable: true,
   })
   deleted_at: Date | null;
 
   @Column('varchar', {
+    select: false,
     name: 'created_by',
     nullable: true,
     length: 7,
@@ -97,6 +80,7 @@ export class Role {
   created_by: string | null;
 
   @Column('varchar', {
+    select: false,
     name: 'updated_by',
     nullable: true,
     length: 7,
@@ -104,6 +88,7 @@ export class Role {
   updated_by: string | null;
 
   @Column('varchar', {
+    select: false,
     name: 'deleted_by',
     nullable: true,
     length: 7,

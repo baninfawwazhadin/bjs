@@ -34,12 +34,14 @@ export class UserDummy {
   name: string;
 
   @CreateDateColumn({
+    select: false,
     name: 'created_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date;
 
   @UpdateDateColumn({
+    select: false,
     name: 'updated_at',
     default: () => 'CURRENT_TIMESTAMP',
   })
