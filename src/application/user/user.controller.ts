@@ -37,7 +37,7 @@ export class UserController {
 
   @ApiStandardResponse(User, HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('Super Admin')
+  @Roles('R001')
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'User registered successfully.')
   async register(
@@ -97,7 +97,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('Super Admin')
+  @Roles('R001')
   @Put(':pkid')
   @ResponseMetadata(HttpStatus.ACCEPTED, 'User updated successfully.')
   async update(

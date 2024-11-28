@@ -39,7 +39,7 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Access Denied: Role not found.');
     }
 
-    if (!requiredRoles.includes(userRole.name)) {
+    if (!requiredRoles.includes(userRole.pkid)) {
       throw new ForbiddenException('Access Denied: Insufficient role.');
     }
 
