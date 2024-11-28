@@ -12,10 +12,10 @@ import {
 import { Role } from './role.entity';
 
 @Index('email_UNIQUE', ['email'], { unique: true })
-@Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
 @Index('user_id_UNIQUE', ['pkid'], { unique: true })
 @Index('id_UNIQUE', ['id'], { unique: true })
 @Index('username_UNIQUE', ['username'], { unique: true })
+@Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
 @Index('role_pkid_idx', ['role_pkid'], {})
 @Index('user_createdby_pkid_idx', ['created_by'], {})
 @Index('user_updatedby_pkid_idx', ['updated_by'], {})
@@ -64,10 +64,11 @@ export class User {
 
   @Column('varchar', {
     name: 'phone_number',
+    nullable: true,
     unique: true,
     length: 20,
   })
-  phone_number: string;
+  phone_number: string | null;
 
   @Column('varchar', {
     name: 'email',

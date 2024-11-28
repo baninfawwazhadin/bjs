@@ -28,12 +28,33 @@ export class Role {
   @PrimaryColumn({ type: 'varchar' })
   pkid: string;
 
-  @Column('varchar', {
+  @Column('enum', {
     name: 'name',
     unique: true,
-    length: 20,
+    enum: [
+      'Super Admin',
+      'Admin Order',
+      'General Manager',
+      'Direksi',
+      'Kasir',
+      'Pelaksana',
+      'Filing',
+      'Biling',
+      'Accounting & Tax',
+      'Courier',
+    ],
   })
-  name: string;
+  name:
+    | 'Super Admin'
+    | 'Admin Order'
+    | 'General Manager'
+    | 'Direksi'
+    | 'Kasir'
+    | 'Pelaksana'
+    | 'Filing'
+    | 'Biling'
+    | 'Accounting & Tax'
+    | 'Courier';
 
   @Column('varchar', {
     name: 'description',

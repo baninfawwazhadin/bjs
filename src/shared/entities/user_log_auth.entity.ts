@@ -25,9 +25,8 @@ export class UserLogAuth {
 
   @Column('datetime', {
     name: 'date',
-    nullable: true,
   })
-  date: Date | null;
+  date: Date;
 
   @Column('datetime', {
     name: 'login_time',

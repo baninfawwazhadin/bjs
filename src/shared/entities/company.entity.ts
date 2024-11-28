@@ -9,10 +9,10 @@ import {
 } from 'typeorm';
 
 @Index('email_UNIQUE', ['email'], { unique: true })
-@Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
-@Index('NPWP_UNIQUE', ['NPWP'], { unique: true })
 @Index('company_id_UNIQUE', ['pkid'], { unique: true })
 @Index('pkid_UNIQUE', ['id'], { unique: true })
+@Index('phone_number_UNIQUE', ['phone_number'], { unique: true })
+@Index('NPWP_UNIQUE', ['NPWP'], { unique: true })
 @Entity('company', { schema: 'db_bjs' })
 export class Company {
   @Column('int', {
@@ -32,10 +32,11 @@ export class Company {
 
   @Column('varchar', {
     name: 'phone_number',
+    nullable: true,
     unique: true,
     length: 20,
   })
-  phone_number: string;
+  phone_number: string | null;
 
   @Column('varchar', {
     name: 'email',
@@ -46,26 +47,25 @@ export class Company {
 
   @Column('varchar', {
     name: 'NPWP',
+    nullable: true,
     unique: true,
     length: 50,
   })
-  NPWP: string;
+  NPWP: string | null;
 
   @Column('tinyint', {
     name: 'is_PPN_included',
-    nullable: true,
     width: 1,
     default: () => "'1'",
   })
-  is_PPN_included: boolean | null;
+  is_PPN_included: boolean;
 
   @Column('tinyint', {
     name: 'is_active',
-    nullable: true,
     width: 1,
     default: () => "'1'",
   })
-  is_active: boolean | null;
+  is_active: boolean;
 
   @CreateDateColumn({
     name: 'created_at',

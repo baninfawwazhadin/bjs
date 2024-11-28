@@ -61,8 +61,9 @@ export class CompanyPic {
 
   @Column('tinyint', {
     name: 'is_active',
+    width: 1,
   })
-  is_active: number;
+  is_active: boolean;
 
   @CreateDateColumn({
     name: 'created_at',

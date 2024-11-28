@@ -8,9 +8,9 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 
-@Index('request_type_name_UNIQUE', ['name'], { unique: true })
-@Index('request_type_id_UNIQUE', ['pkid'], { unique: true })
-@Index('pkid_UNIQUE', ['id'], { unique: true })
+@Index('id_UNIQUE', ['id'], { unique: true })
+@Index('pkid_UNIQUE', ['pkid'], { unique: true })
+@Index('name_UNIQUE', ['name'], { unique: true })
 @Entity('request_type', { schema: 'db_bjs' })
 export class RequestType {
   @Column('int', {
@@ -25,9 +25,16 @@ export class RequestType {
   @Column('varchar', {
     name: 'name',
     unique: true,
-    length: 50,
+    length: 20,
   })
   name: string;
+
+  @Column('varchar', {
+    name: 'description',
+    nullable: true,
+    length: 50,
+  })
+  description: string | null;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -52,21 +59,21 @@ export class RequestType {
   @Column('varchar', {
     name: 'created_by',
     nullable: true,
-    length: 7,
+    length: 45,
   })
   created_by: string | null;
 
   @Column('varchar', {
     name: 'updated_by',
     nullable: true,
-    length: 7,
+    length: 45,
   })
   updated_by: string | null;
 
   @Column('varchar', {
     name: 'deleted_by',
     nullable: true,
-    length: 7,
+    length: 45,
   })
   deleted_by: string | null;
 }
