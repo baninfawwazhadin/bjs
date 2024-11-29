@@ -6,7 +6,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Company } from './company.entity';
 
 @Index('pkid_UNIQUE', ['id'], { unique: true })
 @Index('PIC_id_UNIQUE', ['pkid'], { unique: true })
@@ -111,4 +114,8 @@ export class CompanyPic {
     length: 45,
   })
   deleted_by: string | null;
+
+  @ManyToOne(() => Company)
+  @JoinColumn([{ name: 'company_pkid', referencedColumnName: 'pkid' }])
+  company: Company;
 }

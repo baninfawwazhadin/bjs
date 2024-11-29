@@ -32,7 +32,7 @@ export class PutCompanyDto {
   is_PPN_included: boolean;
 
   @IsBoolean()
-  is_active?: boolean;
+  is_active: boolean;
 
   updated_by?: string;
 }

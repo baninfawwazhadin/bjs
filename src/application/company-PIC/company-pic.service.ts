@@ -12,43 +12,41 @@ import {
   Not,
   Repository,
 } from 'typeorm';
-import { PostCompanyDto } from './dto/post-company.dto';
-import { PutCompanyDto } from './dto/put-company.dto';
+import { PostCompanyPICDto } from './dto/post-company-pic.dto';
+import { PutCompanyPICDto } from './dto/put-company-pic.dto';
 import { GetTableDto, ResultTable } from '~/shared/dto/general.dto';
-import { Company } from '~/shared/entities/company.entity';
+import { CompanyPic } from '~/shared/entities/company_PIC.entity';
 
 @Injectable()
-export class CompanyService {
-  private readonly companyRepository: Repository<Company>;
+export class CompanyPICService {
+  private readonly companyPICRepository: Repository<CompanyPic>;
   constructor(@Inject('DATA_SOURCE') private readonly dataSource: DataSource) {
-    this.companyRepository = this.dataSource.getRepository(Company);
+    this.companyPICRepository = this.dataSource.getRepository(CompanyPic);
   }
 
   private async isFieldUnique(
-    field: keyof Company,
+    field: keyof CompanyPic,
     value: string,
     excludePkid?: string,
   ): Promise<boolean> {
-    const whereCondition: FindOptionsWhere<Company> = { [field]: value };
+    const whereCondition: FindOptionsWhere<CompanyPic> = { [field]: value };
     if (excludePkid) {
       whereCondition.pkid = Not(excludePkid);
     }
-    const count = await this.companyRepository.count({ where: whereCondition });
+    const count = await this.companyPICRepository.count({
+      where: whereCondition,
+    });
     console.log(count);
     return count === 0;
   }
 
-  async createCompany(dto: PostCompanyDto): Promise<Company> {
-    const isNameUnique = await this.isFieldUnique('name', dto.name);
+  async createCompanyPIC(dto: PostCompanyPICDto): Promise<CompanyPic> {
+    console.log('masuk sini');
     const isPhoneNumberUnique = await this.isFieldUnique(
       'phone_number',
-      dto.phone_number ?? '',
+      dto.phone_number,
     );
     const isEmailUsed = await this.isFieldUnique('email', dto.email);
-
-    if (!isNameUnique) {
-      throw new BadRequestException(`The name '${dto.name}' is already taken.`);
-    }
     if (!isPhoneNumberUnique) {
       throw new BadRequestException(`Phone number is already used.`);
     }
@@ -56,26 +54,35 @@ export class CompanyService {
       throw new BadRequestException(`Email is already used.`);
     }
 
-    const newCompany = this.companyRepository.create(dto);
-    await this.companyRepository.save(newCompany, { reload: false });
-    const result = await this.companyRepository.findOne({
+    console.log('masuk sini2');
+    const newCompanyPIC = this.companyPICRepository.create(dto);
+    console.log('masuk sini3');
+    await this.companyPICRepository.save(newCompanyPIC, { reload: false });
+    console.log('masuk sini4');
+    const result = await this.companyPICRepository.findOne({
       where: {
-        name: dto.name,
+        first_name: dto.first_name,
+        last_name: dto.last_name,
+        email: dto.email,
       },
     });
     if (!result) {
-      throw new ConflictException(`Company not found after create.`);
+      throw new ConflictException(`Company PIC not found after created.`);
     }
     return result;
   }
 
-  async updateCompany(dto: PutCompanyDto, pkid: string): Promise<Company> {
-    const company = await this.companyRepository.findOne({ where: { pkid } });
-    if (!company) {
-      throw new NotFoundException(`Company with ID '${pkid}' not found`);
+  async updateCompanyPIC(
+    dto: PutCompanyPICDto,
+    pkid: string,
+  ): Promise<CompanyPic> {
+    const companyPIC = await this.companyPICRepository.findOne({
+      where: { pkid },
+    });
+    if (!companyPIC) {
+      throw new NotFoundException(`Company PIC with ID '${pkid}' not found`);
     }
 
-    const isNameUnique = await this.isFieldUnique('name', dto.name, pkid);
     const isPhoneNumberUnique = await this.isFieldUnique(
       'phone_number',
       dto.phone_number ?? '',
@@ -83,9 +90,6 @@ export class CompanyService {
     );
     const isEmailUsed = await this.isFieldUnique('email', dto.email, pkid);
 
-    if (!isNameUnique) {
-      throw new BadRequestException(`The name '${dto.name}' is already taken.`);
-    }
     if (!isPhoneNumberUnique) {
       throw new BadRequestException(`Phone number is already used.`);
     }
@@ -93,27 +97,31 @@ export class CompanyService {
       throw new BadRequestException(`Email is already used.`);
     }
 
-    company.name = dto.name;
-    company.phone_number = dto.phone_number ?? '';
-    company.email = dto.email;
-    company.NPWP = dto.NPWP ?? '';
-    company.is_PPN_included = dto.is_PPN_included;
-    company.is_active = dto.is_active;
-    return this.companyRepository.save(company);
+    companyPIC.first_name = dto.first_name;
+    companyPIC.last_name = dto.last_name;
+    companyPIC.phone_number = dto.phone_number;
+    companyPIC.email = dto.email;
+    companyPIC.position = dto.position;
+    companyPIC.is_active = dto.is_active;
+    return await this.companyPICRepository.save(companyPIC);
   }
 
-  async deleteCompany(pkid: string): Promise<void> {
-    const company = await this.companyRepository.findOne({ where: { pkid } });
-    if (!company) {
-      throw new NotFoundException(`Company with ID '${pkid}' not found`);
+  async deleteCompanyPIC(pkid: string): Promise<void> {
+    const companyPIC = await this.companyPICRepository.findOne({
+      where: { pkid },
+    });
+    if (!companyPIC) {
+      throw new NotFoundException(`Company PIC with ID '${pkid}' not found`);
     }
-    await this.companyRepository.softDelete({ pkid });
+    await this.companyPICRepository.softDelete({ pkid });
   }
 
-  async getCompany(payload: GetTableDto) {
+  async getCompanyPIC(payload: GetTableDto) {
     const page = (payload.page - 1) * payload.limit;
     const keyword = payload.term ? payload.term.trim() : '';
-    const sql = this.companyRepository.createQueryBuilder('a').where('1 = 1');
+    const sql = this.companyPICRepository
+      .createQueryBuilder('a')
+      .where('1 = 1');
 
     if (keyword != '') {
       sql.andWhere(
@@ -149,14 +157,16 @@ export class CompanyService {
     return result;
   }
 
-  async getListCompany(pkid?: string): Promise<Company | Company[]> {
+  async getListCompanyPIC(pkid?: string): Promise<CompanyPic[]> {
     if (pkid) {
-      const company = await this.companyRepository.findOne({ where: { pkid } });
-      if (!company) {
+      const companyPIC = await this.companyPICRepository.findOne({
+        where: { pkid },
+      });
+      if (!companyPIC) {
         throw new NotFoundException(`Company with ID '${pkid}' not found`);
       }
-      return company;
+      return [companyPIC];
     }
-    return this.companyRepository.find();
+    return await this.companyPICRepository.find();
   }
 }
