@@ -16,12 +16,38 @@ import { Product } from '~/shared/entities/product.entity';
 import { PostProductDto } from './dto/post-product.dto';
 import { PutProductDto } from './dto/put-product.dto';
 import { GetTableDto, ResultTable } from '~/shared/dto/general.dto';
+import MasterDataProduct from './data/product.json';
 
 @Injectable()
 export class ProductService {
   private readonly productRepository: Repository<Product>;
   constructor(@Inject('DATA_SOURCE') private readonly dataSource: DataSource) {
     this.productRepository = this.dataSource.getRepository(Product);
+  }
+
+  async checkMasterData() {
+    const foundMaster = await this.productRepository.findOne({
+      where: {
+        pkid: 'A001',
+      },
+    });
+    if (foundMaster) {
+      return false;
+    }
+    return true;
+  }
+
+  async generateMasterData() {
+    await this.dataSource.transaction(async (manager) => {
+      const productRepository = manager.getRepository(Product);
+
+      for (const data of MasterDataProduct) {
+        await productRepository.save({
+          pkid: data.pkid,
+          name: data.name,
+        });
+      }
+    });
   }
 
   private async isNameUnique(
@@ -58,7 +84,7 @@ export class ProductService {
     return result;
   }
 
-  async updateProduct(dto: PutProductDto, pkid: string): Promise<Product> {
+  async updateProduct(dto: PutProductDto, pkid: string) {
     const product = await this.productRepository.findOne({
       where: { pkid },
     });
@@ -72,10 +98,11 @@ export class ProductService {
     }
 
     product.name = dto.name;
-    return this.productRepository.save(product);
+    const result = await this.productRepository.save(product);
+    return result;
   }
 
-  async deleteProduct(pkid: string): Promise<void> {
+  async deleteProduct(pkid: string) {
     const product = await this.productRepository.findOne({
       where: { pkid },
     });
@@ -83,6 +110,7 @@ export class ProductService {
       throw new NotFoundException(`Product with ID '${pkid}' not found`);
     }
     await this.productRepository.softDelete({ pkid });
+    return true;
   }
 
   async getProduct(payload: GetTableDto) {
@@ -124,7 +152,7 @@ export class ProductService {
     return result;
   }
 
-  async getListProduct(pkid?: string): Promise<Product | Product[]> {
+  async getListProduct(pkid?: string) {
     if (pkid) {
       const product = await this.productRepository.findOne({
         where: { pkid },
@@ -132,8 +160,9 @@ export class ProductService {
       if (!product) {
         throw new NotFoundException(`Product with ID '${pkid}' not found`);
       }
-      return product;
+      return [product];
     }
-    return this.productRepository.find();
+    const result = await this.productRepository.find();
+    return result;
   }
 }

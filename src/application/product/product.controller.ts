@@ -18,7 +18,6 @@ import { ResponseMetadata } from '~/shared/decorator/response.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { GetTableDto } from '~/shared/dto/general.dto';
-import { Product } from '~/shared/entities/product.entity';
 
 @ApiBearerAuth()
 @ApiTags('Product')
@@ -30,24 +29,24 @@ export class ProductController {
   @Post()
   @ResponseMetadata(HttpStatus.CREATED, 'Product added successfully.')
   async createProduct(@Body() postProductDto: PostProductDto) {
-    return await this.productService.createProduct(postProductDto);
+    const result = await this.productService.createProduct(postProductDto);
+    return result;
   }
 
   @UseGuards(JwtAuthGuard)
   @Put(':pkid')
   @ResponseMetadata(HttpStatus.ACCEPTED, 'Product updated successfully.')
-  async updateProduct(
-    @Param('pkid') pkid: string,
-    @Body() dto: PutProductDto,
-  ): Promise<Product> {
-    return this.productService.updateProduct(dto, pkid);
+  async updateProduct(@Param('pkid') pkid: string, @Body() dto: PutProductDto) {
+    const result = await this.productService.updateProduct(dto, pkid);
+    return result;
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':pkid')
   @ResponseMetadata(HttpStatus.OK, 'Product deleted successfully.')
-  async deleteProduct(@Param('pkid') pkid: string): Promise<void> {
-    await this.productService.deleteProduct(pkid);
+  async deleteProduct(@Param('pkid') pkid: string) {
+    const result = await this.productService.deleteProduct(pkid);
+    return result;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -61,10 +60,9 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   @Get('list')
   @ResponseMetadata(HttpStatus.OK, 'Data Product fetched successfully.')
-  async getListProduct(
-    @Query() getProductDto: GetProductDto,
-  ): Promise<Product | Product[]> {
+  async getListProduct(@Query() getProductDto: GetProductDto) {
     const { pkid } = getProductDto;
-    return this.productService.getListProduct(pkid);
+    const result = await this.productService.getListProduct(pkid);
+    return result;
   }
 }
