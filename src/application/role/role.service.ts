@@ -54,7 +54,7 @@ export class RoleService {
       where: { name: payload.name },
     });
     if (foundSameName.length > 0) {
-      throw new BadRequestException(`Name alread used`);
+      throw new BadRequestException(`Name already used`);
     }
 
     if (payload.description) foundRole.description = payload.description;
@@ -65,7 +65,7 @@ export class RoleService {
     return true;
   }
 
-  async delete(userJwt: JwtPayload, pkid: string) {
+  async delete(userJwt: JwtPayload, pkid: string): Promise<boolean> {
     const foundRole = await this.roleRepository.findOne({ where: { pkid } });
     if (!foundRole) {
       throw new NotFoundException(`Role not found`);
