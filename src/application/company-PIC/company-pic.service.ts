@@ -54,11 +54,8 @@ export class CompanyPICService {
       throw new BadRequestException(`Email is already used.`);
     }
 
-    console.log('masuk sini2');
     const newCompanyPIC = this.companyPICRepository.create(dto);
-    console.log('masuk sini3');
     await this.companyPICRepository.save(newCompanyPIC, { reload: false });
-    console.log('masuk sini4');
     const result = await this.companyPICRepository.findOne({
       where: {
         first_name: dto.first_name,
