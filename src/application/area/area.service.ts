@@ -59,7 +59,7 @@ export class AreaService {
       whereCondition.pkid = Not(excludePkid);
     }
     const count = await this.areaRepository.count({ where: whereCondition });
-    return count === 0;
+    return count == 0;
   }
 
   async createArea(dto: PostAreaDto): Promise<Area> {
