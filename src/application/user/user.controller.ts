@@ -113,6 +113,6 @@ export class UserController {
   getExample(): string {
     const riskyArray = [1, 2, 3];
     return riskyArray[qwe].toString();
-    qwe;
+    qw;
   }
 }
