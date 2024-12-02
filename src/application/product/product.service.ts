@@ -102,7 +102,7 @@ export class ProductService {
     return result;
   }
 
-  async deleteProduct(pkid: string) {
+  async deleteProduct(pkid: string): Promise<boolean> {
     const product = await this.productRepository.findOne({
       where: { pkid },
     });

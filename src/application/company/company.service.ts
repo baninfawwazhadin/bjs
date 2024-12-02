@@ -99,15 +99,16 @@ export class CompanyService {
     company.NPWP = dto.NPWP ?? '';
     company.is_PPN_included = dto.is_PPN_included;
     company.is_active = dto.is_active;
-    return this.companyRepository.save(company);
+    return await this.companyRepository.save(company);
   }
 
-  async deleteCompany(pkid: string): Promise<void> {
+  async deleteCompany(pkid: string): Promise<boolean> {
     const company = await this.companyRepository.findOne({ where: { pkid } });
     if (!company) {
       throw new NotFoundException(`Company with ID '${pkid}' not found`);
     }
     await this.companyRepository.softDelete({ pkid });
+    return true;
   }
 
   async getCompany(payload: GetTableDto) {
@@ -157,6 +158,6 @@ export class CompanyService {
       }
       return company;
     }
-    return this.companyRepository.find();
+    return await this.companyRepository.find();
   }
 }

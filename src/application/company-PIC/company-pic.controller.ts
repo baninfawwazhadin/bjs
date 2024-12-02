@@ -65,6 +65,7 @@ export class CompanyPICController {
     @Query() getCompanyPICDto: GetCompanyPICDto,
   ): Promise<CompanyPic[]> {
     const { pkid } = getCompanyPICDto;
-    return this.companyPICService.getListCompanyPIC(pkid);
+    const { company_pkid } = getCompanyPICDto;
+    return this.companyPICService.getListCompanyPIC(pkid, company_pkid);
   }
 }

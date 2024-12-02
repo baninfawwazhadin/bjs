@@ -93,15 +93,16 @@ export class AreaService {
     }
 
     area.name = dto.name;
-    return this.areaRepository.save(area);
+    return await this.areaRepository.save(area);
   }
 
-  async deleteArea(pkid: string): Promise<void> {
+  async deleteArea(pkid: string): Promise<boolean> {
     const area = await this.areaRepository.findOne({ where: { pkid } });
     if (!area) {
       throw new NotFoundException(`Area with ID '${pkid}' not found`);
     }
     await this.areaRepository.softDelete({ pkid });
+    return true;
   }
 
   async getArea(payload: GetTableDto) {
@@ -151,6 +152,6 @@ export class AreaService {
       }
       return area;
     }
-    return this.areaRepository.find();
+    return await this.areaRepository.find();
   }
 }

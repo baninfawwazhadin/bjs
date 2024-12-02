@@ -54,11 +54,8 @@ export class CompanyPICService {
       throw new BadRequestException(`Email is already used.`);
     }
 
-    console.log('masuk sini2');
     const newCompanyPIC = this.companyPICRepository.create(dto);
-    console.log('masuk sini3');
     await this.companyPICRepository.save(newCompanyPIC, { reload: false });
-    console.log('masuk sini4');
     const result = await this.companyPICRepository.findOne({
       where: {
         first_name: dto.first_name,
@@ -106,7 +103,7 @@ export class CompanyPICService {
     return await this.companyPICRepository.save(companyPIC);
   }
 
-  async deleteCompanyPIC(pkid: string): Promise<void> {
+  async deleteCompanyPIC(pkid: string): Promise<boolean> {
     const companyPIC = await this.companyPICRepository.findOne({
       where: { pkid },
     });
@@ -114,6 +111,7 @@ export class CompanyPICService {
       throw new NotFoundException(`Company PIC with ID '${pkid}' not found`);
     }
     await this.companyPICRepository.softDelete({ pkid });
+    return true;
   }
 
   async getCompanyPIC(payload: GetTableDto) {
@@ -157,15 +155,27 @@ export class CompanyPICService {
     return result;
   }
 
-  async getListCompanyPIC(pkid?: string): Promise<CompanyPic[]> {
+  async getListCompanyPIC(
+    pkid?: string,
+    company_pkid?: string,
+  ): Promise<CompanyPic[]> {
     if (pkid) {
       const companyPIC = await this.companyPICRepository.findOne({
         where: { pkid },
       });
       if (!companyPIC) {
-        throw new NotFoundException(`Company with ID '${pkid}' not found`);
+        throw new NotFoundException(`Company PIC with ID '${pkid}' not found`);
       }
       return [companyPIC];
+    }
+    if (company_pkid) {
+      const companyPKID_PIC = await this.companyPICRepository.find({
+        where: { company_pkid },
+      });
+      if (!companyPKID_PIC) {
+        throw new NotFoundException(`Company with ID '${pkid}' not found`);
+      }
+      return companyPKID_PIC;
     }
     return await this.companyPICRepository.find();
   }

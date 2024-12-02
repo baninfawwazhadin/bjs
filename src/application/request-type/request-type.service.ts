@@ -74,10 +74,10 @@ export class RequestTypeService {
     }
 
     requestType.name = dto.name;
-    return this.requestTypeRepository.save(requestType);
+    return await this.requestTypeRepository.save(requestType);
   }
 
-  async deleteRequestType(pkid: string): Promise<void> {
+  async deleteRequestType(pkid: string): Promise<boolean> {
     const requestType = await this.requestTypeRepository.findOne({
       where: { pkid },
     });
@@ -85,6 +85,7 @@ export class RequestTypeService {
       throw new NotFoundException(`Request Type with ID '${pkid}' not found`);
     }
     await this.requestTypeRepository.softDelete({ pkid });
+    return true;
   }
 
   async getRequestType(payload: GetTableDto) {
@@ -140,6 +141,6 @@ export class RequestTypeService {
       }
       return requestType;
     }
-    return this.requestTypeRepository.find();
+    return await this.requestTypeRepository.find();
   }
 }

@@ -8,11 +8,6 @@ import {
 } from 'class-validator';
 
 export class PutCompanyPICDto {
-  @IsNotEmpty({ message: 'Company pkid has to be filled' })
-  @IsString()
-  @Length(1, 7)
-  company_pkid: string;
-
   @IsNotEmpty({ message: 'First name cannot be blank' })
   @IsString()
   @Length(1, 45)
