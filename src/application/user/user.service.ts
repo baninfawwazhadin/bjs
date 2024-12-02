@@ -39,32 +39,6 @@ export class UserService {
     this.userLogAuthRepository = this.dataSource.getRepository(UserLogAuth);
   }
 
-  calculate(a: number, b: number, operation: string): number {
-    switch (operation) {
-      case 'add':
-        return a + b;
-      case 'subtract':
-        return a - b;
-      case 'multiply':
-        return a * b;
-      case 'divide':
-        return b !== 0 ? a / b : 0;
-      case 'modulus':
-        return a % b;
-      case 'power':
-        return Math.pow(a, b);
-      default:
-        throw new Error('Unsupported operation');
-    }
-  }
-  addNumbers(a: number, b: number): number {
-    return a + b;
-  }
-
-  addTwoNumbers(x: number, y: number): number {
-    return x + y;
-  }
-
   async checkMasterData() {
     const foundAdmin = await this.userRepository.findOne({
       where: {
@@ -86,7 +60,7 @@ export class UserService {
       const userRepository = manager.getRepository(User);
       const userOtpRepository = manager.getRepository(UserOtp);
       const hashedPassword = await this.helperService.encryptBcrypt(
-        process.env.DEFAULT_PASSWORD ?? 'Admin123*',
+        process.env['DEFAULT_PASSWORD'] ?? 'Admin123*',
       );
       await userRepository.insert({
         pkid: 'BJSA001',
@@ -151,7 +125,8 @@ export class UserService {
       const result = this.findOneProfile(newUserPkId);
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
+      // Check if the error is an instance of a known exception type
       if (
         error instanceof BadRequestException ||
         error instanceof InternalServerErrorException ||
@@ -160,8 +135,14 @@ export class UserService {
         throw error;
       }
 
+      if (error instanceof Error) {
+        throw new InternalServerErrorException(
+          'An unexpected error occurred during user creation: ' + error.message,
+        );
+      }
+
       throw new InternalServerErrorException(
-        'An unexpected error occurred during user creation: ' + error.message,
+        'An unexpected error occurred during user creation: Unknown error',
       );
     }
   }

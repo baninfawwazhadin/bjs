@@ -7,11 +7,11 @@ export class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST ?? 'smtp.gmail.com',
-      port: this.port(process.env.EMAIL_PORT),
+      host: process.env['EMAIL_HOST'] ?? 'smtp.gmail.com',
+      port: this.port(process.env['EMAIL_PORT']),
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
+        user: process.env['EMAIL_USER'],
         pass: 'zcey xmjh rsqs damv',
       },
       logger: true,
@@ -27,7 +27,7 @@ export class EmailService {
   async sendEmail(to: string, subject: string, text: string, html?: string) {
     try {
       const info = await this.transporter.sendMail({
-        from: `"BJS" <${process.env.MAIL_USER}>`,
+        from: `"BJS" <${process.env['MAIL_USER']}>`,
         to,
         subject,
         text,
