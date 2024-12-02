@@ -112,6 +112,6 @@ export class UserController {
   @Get()
   getExample(): string {
     const riskyArray = [1, 2, 3];
-    return riskyArray[10].toString();
+    return riskyArray[qwe].toString();
   }
 }
