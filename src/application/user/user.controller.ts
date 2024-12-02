@@ -108,4 +108,10 @@ export class UserController {
     const result = await this.userService.update(pkid, payload, userJWT);
     return result;
   }
+
+  @Get()
+  getExample(): string {
+    const riskyArray = [1, 2, 3];
+    return riskyArray[10].toString();
+  }
 }

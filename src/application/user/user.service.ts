@@ -39,6 +39,32 @@ export class UserService {
     this.userLogAuthRepository = this.dataSource.getRepository(UserLogAuth);
   }
 
+  calculate(a: number, b: number, operation: string): number {
+    switch (operation) {
+      case 'add':
+        return a + b;
+      case 'subtract':
+        return a - b;
+      case 'multiply':
+        return a * b;
+      case 'divide':
+        return b !== 0 ? a / b : 0;
+      case 'modulus':
+        return a % b;
+      case 'power':
+        return Math.pow(a, b);
+      default:
+        throw new Error('Unsupported operation');
+    }
+  }
+  addNumbers(a: number, b: number): number {
+    return a + b;
+  }
+
+  addTwoNumbers(x: number, y: number): number {
+    return x + y;
+  }
+
   async checkMasterData() {
     const foundAdmin = await this.userRepository.findOne({
       where: {
