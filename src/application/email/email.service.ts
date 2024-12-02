@@ -12,7 +12,7 @@ export class EmailService {
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: 'zcey xmjh rsqs damv',
       },
       logger: true,
     });
