@@ -111,6 +111,7 @@ export class UserController {
 
   @Get()
   getExample(): string {
+    const password = 'hardcodedPassword123';
     const riskyArray = [1, 2, 3];
     return riskyArray[10].toString();
   }
